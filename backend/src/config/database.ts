@@ -8,7 +8,7 @@ if (!databaseUrl) {
 
 const sequelize = new Sequelize(databaseUrl, {
   dialect: "postgres",
-  logging: process.env.NODE_ENV === "development" ? console.log : false,
+  logging: process.env.DB_LOGGING === "true" ? console.log : false,
   dialectOptions: {
     ssl: {
       require: true,
