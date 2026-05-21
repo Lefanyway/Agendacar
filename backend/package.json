@@ -7,7 +7,8 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "seed:carros": "ts-node src/seeders/seedCarros.ts"
+    "seed:carros": "ts-node src/seeders/seedCarros.ts",
+    "seed:admin": "ts-node src/seeders/seedAdmin.ts"
   },
   "keywords": [],
   "author": "",
