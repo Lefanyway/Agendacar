@@ -10,20 +10,38 @@ import api from '../services/api'
 const DARK_BG = 'linear-gradient(180deg, #050a1f 0%, #0a1438 50%, #0f1d4a 100%)'
 
 export default function Home() {
-  const [carros, setCarros] = useState([])
-  const [carregando, setCarregando] = useState(true)
-  const [filtro, setFiltro] = useState('')
+const [carros, setCarros] = useState([])
+const [carregando, setCarregando] = useState(true)
+const [filtro, setFiltro] = useState('')
+const [tipo, setTipo] = useState('')
+const [disponivel, setDisponivel] = useState('')
+const [ordenar, setOrdenar] = useState('')
 
   useEffect(() => {
-    api.get('/carros')
-      .then(({ data }) => setCarros(data))
-      .finally(() => setCarregando(false))
-  }, [])
+  async function carregarCarros() {
+    try {
+      setCarregando(true)
 
-  const carrosFiltrados = carros.filter(c =>
-    c.nome.toLowerCase().includes(filtro.toLowerCase()) ||
-    c.tipo.toLowerCase().includes(filtro.toLowerCase())
-  )
+      const params = {}
+
+      if (filtro) params.busca = filtro
+      if (tipo) params.tipo = tipo
+      if (disponivel) params.disponivel = disponivel
+      if (ordenar) params.ordenar = ordenar
+
+      const { data } = await api.get('/carros', { params })
+      setCarros(data)
+    } catch (error) {
+      console.error('Erro ao carregar carros:', error)
+    } finally {
+      setCarregando(false)
+    }
+  }
+
+  carregarCarros()
+}, [filtro, tipo, disponivel, ordenar])
+
+  const carrosFiltrados = carros
 
   return (
     <div style={{ minHeight: '100vh', background: DARK_BG }}>
@@ -71,36 +89,97 @@ export default function Home() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            style={{ position: 'relative' }}
-          >
-            <Search size={16} style={{
-              position: 'absolute', left: 12,
-              top: '50%', transform: 'translateY(-50%)',
-              color: 'rgba(255,255,255,0.35)', pointerEvents: 'none',
-            }} />
-            <input
-              type="text"
-              value={filtro}
-              onChange={e => setFiltro(e.target.value)}
-              placeholder="Buscar modelo ou tipo..."
-              style={{
-                paddingLeft: 36, paddingRight: 16,
-                paddingTop: 10, paddingBottom: 10,
-                background: 'rgba(255,255,255,0.07)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 12,
-                color: '#ffffff',
-                fontSize: '0.85rem',
-                outline: 'none',
-                width: '100%',
-                minWidth: 240,
-                transition: 'border-color 0.2s',
-                backdropFilter: 'blur(8px)',
-              }}
-              onFocus={e => { e.target.style.borderColor = '#3b82f6' }}
-              onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.12)' }}
-            />
-          </motion.div>
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full sm:w-auto"
+>
+  <div style={{ position: 'relative' }}>
+    <Search size={16} style={{
+      position: 'absolute', left: 12,
+      top: '50%', transform: 'translateY(-50%)',
+      color: 'rgba(255,255,255,0.35)', pointerEvents: 'none',
+    }} />
+    <input
+      type="text"
+      value={filtro}
+      onChange={e => setFiltro(e.target.value)}
+      placeholder="Buscar modelo ou tipo..."
+      style={{
+        paddingLeft: 36, paddingRight: 16,
+        paddingTop: 10, paddingBottom: 10,
+        background: 'rgba(255,255,255,0.07)',
+        border: '1px solid rgba(255,255,255,0.12)',
+        borderRadius: 12,
+        color: '#ffffff',
+        fontSize: '0.85rem',
+        outline: 'none',
+        width: '100%',
+        minWidth: 220,
+        transition: 'border-color 0.2s',
+        backdropFilter: 'blur(8px)',
+      }}
+      onFocus={e => { e.target.style.borderColor = '#3b82f6' }}
+      onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.12)' }}
+    />
+  </div>
+
+  <select
+    value={tipo}
+    onChange={e => setTipo(e.target.value)}
+    style={{
+      padding: '10px 12px',
+      background: 'rgba(255,255,255,0.07)',
+      border: '1px solid rgba(255,255,255,0.12)',
+      borderRadius: 12,
+      color: '#ffffff',
+      fontSize: '0.85rem',
+      outline: 'none',
+      backdropFilter: 'blur(8px)',
+    }}
+  >
+    <option value="">Todos os tipos</option>
+    <option value="Sport">Sport</option>
+    <option value="SUV">SUV</option>
+    <option value="Picape">Picape</option>
+  </select>
+
+  <select
+    value={disponivel}
+    onChange={e => setDisponivel(e.target.value)}
+    style={{
+      padding: '10px 12px',
+      background: 'rgba(255,255,255,0.07)',
+      border: '1px solid rgba(255,255,255,0.12)',
+      borderRadius: 12,
+      color: '#ffffff',
+      fontSize: '0.85rem',
+      outline: 'none',
+      backdropFilter: 'blur(8px)',
+    }}
+  >
+    <option value="">Todos</option>
+    <option value="true">Disponíveis</option>
+    <option value="false">Indisponíveis</option>
+  </select>
+
+  <select
+    value={ordenar}
+    onChange={e => setOrdenar(e.target.value)}
+    style={{
+      padding: '10px 12px',
+      background: 'rgba(255,255,255,0.07)',
+      border: '1px solid rgba(255,255,255,0.12)',
+      borderRadius: 12,
+      color: '#ffffff',
+      fontSize: '0.85rem',
+      outline: 'none',
+      backdropFilter: 'blur(8px)',
+    }}
+  >
+    <option value="">Ordenar</option>
+    <option value="preco-asc">Menor preço</option>
+    <option value="preco-desc">Maior preço</option>
+    <option value="capacidade-desc">Maior capacidade</option>
+  </select>
+</motion.div>
         </div>
 
         {carregando ? (
@@ -181,6 +260,10 @@ export default function Home() {
 
       <style>{`
         input::placeholder { color: rgba(255,255,255,0.22); }
+        select option {
+  background: #0a1438;
+  color: #ffffff;
+}
         @keyframes pulse {
           0%, 100% { opacity: 0.4; }
           50% { opacity: 0.7; }
