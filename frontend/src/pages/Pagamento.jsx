@@ -199,11 +199,11 @@ export default function Pagamento() {
     try {
       if (dados?.CarroId) {
         await api.post('/reservas', {
-          CarroId: dados.CarroId,
-          dataInicio: dados.dataInicio,
-          dataFim: dados.dataFim,
-          destino: dados.destino,
-        })
+  carroId: Number(dados.CarroId),
+  dataInicio: dados.dataInicio,
+  dataFim: dados.dataFim,
+  destino: dados.destino,
+})
       }
       localStorage.removeItem('dadosReserva')
       setSucesso(true)

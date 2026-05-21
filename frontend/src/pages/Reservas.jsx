@@ -29,11 +29,15 @@ export default function Reservas() {
   useEffect(() => { carregar() }, [])
 
   async function cancelar(id) {
-    if (!window.confirm('Deseja cancelar esta reserva?')) return
-    await api.delete(`/reservas/${id}`)
-    carregar()
-  }
+  if (!window.confirm('Deseja cancelar esta reserva?')) return
 
+  try {
+    await api.patch(`/reservas/${id}/cancelar`)
+    carregar()
+  } catch (err) {
+    alert(err.response?.data?.erro || 'Erro ao cancelar reserva.')
+  }
+}
   const formatBRL = v => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(v)
 
   return (
