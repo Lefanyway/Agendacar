@@ -4,6 +4,7 @@ import carroRoutes from "./routes/carroRoutes";
 import usuarioRoutes from "./routes/usuarioRoutes";
 import reservaRoutes from "./routes/reservaRoutes";
 import { setupSwagger } from "./config/swagger";
+import recomendacaoRoutes from "./routes/recomendacaoRoutes";
 
 const app = express();
 
@@ -18,6 +19,7 @@ setupSwagger(app);
 app.use("/auth", usuarioRoutes);
 app.use("/carros", carroRoutes);
 app.use("/reservas", reservaRoutes);
+app.use("/recomendacoes", recomendacaoRoutes);
 
 app.get("/health", (_req, res) => {
   return res.json({

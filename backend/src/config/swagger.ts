@@ -20,7 +20,8 @@ const options: swaggerJsdoc.Options = {
       { name: "Health", description: "Status da API" },
       { name: "Auth", description: "Cadastro e autenticação" },
       { name: "Carros", description: "Consulta e administração de carros" },
-      { name: "Reservas", description: "Agendamento e cancelamento de reservas" }
+      { name: "Reservas", description: "Agendamento e cancelamento de reservas" },
+      { name: "Recomendações", description: "Recomendação inteligente de carros" }
     ],
     components: {
       securitySchemes: {
@@ -71,7 +72,21 @@ const options: swaggerJsdoc.Options = {
             dataFim: { type: "string", example: "2026-06-05" },
             destino: { type: "string", example: "São Paulo" }
           }
-        }
+        },
+        RecomendacaoCarro: {
+  type: "object",
+  properties: {
+    orcamentoDia: { type: "number", example: 300 },
+    passageiros: { type: "number", example: 5 },
+    tipoViagem: {
+      type: "string",
+      enum: ["economica", "familia", "esportiva", "luxo"],
+      example: "familia"
+    },
+    transmissao: { type: "string", example: "Automático" }
+  }
+}
+        
       }
     },
     paths: {
@@ -326,7 +341,30 @@ const options: swaggerJsdoc.Options = {
             },
             400: {
               description: "Erro ao cancelar reserva"
-            }
+            }, "/recomendacoes/carros": {
+  post: {
+    tags: ["Recomendações"],
+    summary: "Recomenda o carro mais adequado para o perfil informado",
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/RecomendacaoCarro"
+          }
+        }
+      }
+    },
+    responses: {
+      200: {
+        description: "Carro recomendado com score e justificativas"
+      },
+      400: {
+        description: "Erro ao gerar recomendação"
+      }
+    }
+  }
+}
           }
         }
       }
