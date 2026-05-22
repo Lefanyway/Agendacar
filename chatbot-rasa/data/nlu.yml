@@ -1,0 +1,430 @@
+version: "3.1"
+
+nlu:
+  - intent: saudacao
+    examples: |
+      - oi
+      - olá
+      - ola
+      - bom dia
+      - boa tarde
+      - boa noite
+      - e aí
+      - fala
+      - salve
+      - opa
+      - oii
+      - oie
+      - preciso de ajuda
+      - pode me ajudar?
+      - me ajuda
+      - ajuda aqui
+
+  - intent: despedida
+    examples: |
+      - tchau
+      - até mais
+      - até logo
+      - falou
+      - flw
+      - era isso
+      - encerrar
+      - sair
+      - valeu tchau
+      - obrigado tchau
+
+  - intent: agradecimento
+    examples: |
+      - obrigado
+      - obrigada
+      - valeu
+      - vlw
+      - obg
+      - muito obrigado
+      - ajudou
+      - perfeito
+      - show
+      - boa
+      - era isso mesmo
+
+  - intent: reservar_carro
+    examples: |
+      - quero reservar um carro
+      - quero fazer uma reserva
+      - como faço uma reserva?
+      - como reservar?
+      - quero alugar um carro
+      - quero alugar um veículo
+      - preciso agendar um carro
+      - preciso reservar um veículo
+      - fazer reserva
+      - reservar veículo
+      - reservar carro
+      - agendar carro
+      - alugar carro para amanhã
+      - quero um carro para o fim de semana
+      - quero um carro para viajar
+      - qro reservar um carro
+      - quero resrvar um carro
+      - quero reserva carro
+      - como reservo um carro?
+      - como alugo um carro?
+
+  - intent: reservar_modelo
+    examples: |
+      - quero reservar a [Porsche 911](carro_modelo)
+      - quero reservar a [Porsche](carro_modelo)
+      - quero alugar a [Porsche](carro_modelo)
+      - reserva a [Porsche](carro_modelo)
+      - reservar [Porsche 911](carro_modelo)
+      - quero a [Porsche](carro_modelo)
+      - quero pegar a [Porsche](carro_modelo)
+      - quero reservar o [T-Cross](carro_modelo)
+      - quero reservar o [tcross](carro_modelo)
+      - quero alugar o [T-Cross](carro_modelo)
+      - reserva o [T-Cross](carro_modelo)
+      - quero o [T-Cross](carro_modelo)
+      - quero reservar o [Civic Type-R](carro_modelo)
+      - quero reservar o [Civic](carro_modelo)
+      - quero alugar o [Civic](carro_modelo)
+      - reserva o [Civic Type-R](carro_modelo)
+      - quero o [Civic](carro_modelo)
+      - quero reservar a [Silverado](carro_modelo)
+      - quero alugar a [Silverado](carro_modelo)
+      - reserva a [Silverado](carro_modelo)
+      - quero a [Silverado](carro_modelo)
+      - quero reservar a [picape Silverado](carro_modelo)
+
+  - intent: consultar_carros
+    examples: |
+      - quais carros tem?
+      - quais carros estão disponíveis?
+      - quero ver os carros
+      - mostrar carros
+      - mostrar carros disponíveis
+      - ver veículos
+      - consultar veículos
+      - consultar frota
+      - quais veículos posso reservar?
+      - tem carro automático?
+      - tem carro manual?
+      - tem carro de luxo?
+      - tem carro esportivo?
+      - tem suv?
+      - lista de carros
+      - carros disponíveis
+      - quero olhar os carros
+      - q carro tem?
+      - qais carros tem?
+      - quais veiculos tem?
+      - me mostra os carros
+
+  - intent: consultar_modelo
+    examples: |
+      - tem [Porsche](carro_modelo)?
+      - tem [Porsche 911](carro_modelo)?
+      - quero ver a [Porsche](carro_modelo)
+      - mostra a [Porsche](carro_modelo)
+      - informações da [Porsche](carro_modelo)
+      - detalhes da [Porsche 911](carro_modelo)
+      - tem [T-Cross](carro_modelo)?
+      - quero ver o [T-Cross](carro_modelo)
+      - mostra o [T-Cross](carro_modelo)
+      - informações do [T-Cross](carro_modelo)
+      - tem [Civic](carro_modelo)?
+      - tem [Civic Type-R](carro_modelo)?
+      - quero ver o [Civic](carro_modelo)
+      - mostra o [Civic Type-R](carro_modelo)
+      - tem [Silverado](carro_modelo)?
+      - quero ver a [Silverado](carro_modelo)
+      - mostra a [Silverado](carro_modelo)
+
+  - intent: preco_carros
+    examples: |
+      - quanto custa?
+      - qual o preço?
+      - qual o valor?
+      - preço da diária
+      - valor por dia
+      - quanto é a diária?
+      - quanto custa alugar?
+      - preço do carro
+      - valor do veículo
+      - é caro?
+      - tem carro barato?
+      - quero saber o valor
+      - qnt custa?
+      - qnt é a diaria?
+      - qual valor da reserva?
+      - quanto custa a Porsche?
+      - quanto custa o T-Cross?
+      - quanto custa o Civic?
+      - quanto custa a Silverado?
+
+  - intent: disponibilidade
+    examples: |
+      - esse carro está disponível?
+      - tem carro disponível?
+      - como vejo disponibilidade?
+      - posso reservar hoje?
+      - está livre?
+      - carro livre
+      - carro indisponível
+      - disponibilidade do carro
+      - quero saber se pode reservar
+      - tem disponível para hoje?
+      - tem disponível amanhã?
+      - está disponível no fim de semana?
+      - disponivel
+      - disponível hoje
+      - a Porsche está disponível?
+      - o T-Cross está disponível?
+      - o Civic está disponível?
+      - a Silverado está disponível?
+
+  - intent: filtros_carros
+    examples: |
+      - como filtro os carros?
+      - quero filtrar por preço
+      - quero ordenar por menor preço
+      - quero ordenar por maior preço
+      - tem filtro?
+      - posso filtrar por tipo?
+      - quero buscar por modelo
+      - como ordenar os carros?
+      - ordenar carros
+      - filtrar carros
+      - filtro por disponibilidade
+      - filtro por capacidade
+      - procurar carro barato
+      - buscar carro
+      - pesquisar carro
+      - quero pesquisar um carro
+      - como acho um carro específico?
+
+  - intent: pagamento
+    examples: |
+      - como faço o pagamento?
+      - onde pago?
+      - quando eu pago?
+      - aceita cartão?
+      - aceita pix?
+      - pagamento da reserva
+      - quero pagar
+      - como pagar?
+      - forma de pagamento
+      - posso pagar depois?
+      - pagar reserva
+      - valor total
+      - fechar pagamento
+      - pgto
+      - pagmanto
+      - cartão de crédito
+      - pagamento online
+
+  - intent: area_admin
+    examples: |
+      - como entro na área admin?
+      - o que o administrador faz?
+      - quero cadastrar um carro
+      - quero editar um veículo
+      - quero remover um carro
+      - painel administrativo
+      - área administrativa
+      - sou admin
+      - login admin
+      - cadastrar veículo
+      - editar carro
+      - deletar carro
+      - remover veículo
+      - gestão de carros
+      - admin
+      - administrador
+      - painel adm
+
+  - intent: recomendacao
+    examples: |
+      - qual carro você recomenda?
+      - me indique um carro
+      - melhor carro para família
+      - melhor carro para viagem
+      - melhor carro barato
+      - melhor carro esportivo
+      - quero uma recomendação
+      - qual veículo combina comigo?
+      - preciso de um carro barato
+      - preciso de um carro para 5 pessoas
+      - quero um carro econômico
+      - quero um carro confortável
+      - carro para viajar
+      - carro para família
+      - carro para casal
+      - recomenda um carro
+      - recomendação inteligente
+      - sugestão de carro
+      - me ajuda a escolher um carro
+      - não sei qual carro escolher
+      - nao sei qual carro pegar
+      - qual carro pego?
+      - melhor opção
+
+  - intent: login_cadastro
+    examples: |
+      - como faço login?
+      - quero entrar
+      - quero criar conta
+      - quero me cadastrar
+      - cadastro
+      - login
+      - entrar na conta
+      - criar usuário
+      - criar uma conta
+      - preciso de conta?
+      - como cadastro meu usuário?
+      - fazer cadastro
+      - acessar minha conta
+      - logar
+      - me logar
+      - entrar no sistema
+
+  - intent: problema_login
+    examples: |
+      - não consigo entrar
+      - meu login não funciona
+      - senha errada
+      - esqueci minha senha
+      - não entra na conta
+      - deu erro no login
+      - problema no cadastro
+      - erro ao cadastrar
+      - meu usuário não entra
+      - login com erro
+      - senha inválida
+      - email inválido
+      - nao consigo logar
+      - n consigo entrar
+      - bug no login
+      - deu ruim no login
+
+  - intent: minhas_reservas
+    examples: |
+      - onde vejo minhas reservas?
+      - quero ver minhas reservas
+      - minhas reservas
+      - meus agendamentos
+      - onde estão meus carros reservados?
+      - consultar minha reserva
+      - ver reserva feita
+      - histórico de reservas
+      - reserva ativa
+      - tenho reserva?
+      - quero acompanhar minha reserva
+      - status da reserva
+      - ver agendamento
+
+  - intent: alterar_reserva
+    examples: |
+      - quero alterar minha reserva
+      - como mudo a data?
+      - mudar data da reserva
+      - trocar data
+      - alterar agendamento
+      - editar reserva
+      - mudar reserva
+      - quero trocar o carro da reserva
+      - coloquei a data errada
+      - escolhi o carro errado
+      - modificar reserva
+      - corrigir reserva
+
+  - intent: cancelar_reserva
+    examples: |
+      - quero cancelar minha reserva
+      - como cancelo uma reserva?
+      - cancelar reserva
+      - cancelar carro
+      - preciso cancelar o agendamento
+      - quero desistir da reserva
+      - fiz uma reserva errada
+      - como cancelar?
+      - quero cancelar
+      - cancelar agendamento
+      - desfazer reserva
+      - remover reserva
+      - qro cancelar reserva
+      - como cancela a reserva?
+      - cancelar minha locação
+
+  - intent: suporte_humano
+    examples: |
+      - quero falar com alguém
+      - preciso de suporte
+      - falar com atendente
+      - atendimento humano
+      - quero ajuda de uma pessoa
+      - chamar suporte
+      - falar com administrador
+      - preciso resolver com alguém
+      - suporte humano
+      - falar com responsável
+      - tem atendente?
+
+  - intent: fora_escopo
+    examples: |
+      - quero cagar
+      - cagar
+      - merda
+      - bosta
+      - porra
+      - caralho
+      - foda-se
+      - nada a ver
+      - qualquer coisa
+      - sei lá
+      - nao sei
+      - não sei
+      - kkkkkkkkk
+      - hahaha
+      - asdkjasd
+      - ajskdhasjkdh
+      - 123123123
+      - ???
+      - ///////
+      - carro azul banana
+      - banana azul
+      - teste teste teste
+      - blablabla
+      - hmmmm
+      - coisa aleatória
+      - me conta uma piada
+      - qual a previsão do tempo?
+      - quanto está o dólar?
+      - canta uma música
+      - me manda uma receita
+      - fala sobre futebol
+      - indica um filme
+      - escreve uma poesia
+
+  - synonym: Porsche
+    examples: |
+      - porsche
+      - Porsche 911
+      - 911
+
+  - synonym: T-Cross
+    examples: |
+      - tcross
+      - t cross
+      - T-Cross
+
+  - synonym: Civic Type-R
+    examples: |
+      - civic
+      - Civic
+      - type r
+      - Type-R
+
+  - synonym: Silverado
+    examples: |
+      - silverado
+      - Silverado

@@ -1,0 +1,107 @@
+version: "3.1"
+
+rules:
+  - rule: Responder saudacao
+    steps:
+      - intent: saudacao
+      - action: utter_saudacao
+
+  - rule: Responder despedida
+    steps:
+      - intent: despedida
+      - action: utter_despedida
+
+  - rule: Responder agradecimento
+    steps:
+      - intent: agradecimento
+      - action: utter_agradecimento
+
+  - rule: Responder reserva
+    steps:
+      - intent: reservar_carro
+      - action: utter_reservar_carro
+
+  - rule: Responder reserva de modelo
+    steps:
+      - intent: reservar_modelo
+      - action: utter_reservar_modelo
+
+  - rule: Responder consulta de carros
+    steps:
+      - intent: consultar_carros
+      - action: utter_consultar_carros
+
+  - rule: Responder consulta de modelo
+    steps:
+      - intent: consultar_modelo
+      - action: utter_consultar_modelo
+
+  - rule: Responder preco
+    steps:
+      - intent: preco_carros
+      - action: utter_preco_carros
+
+  - rule: Responder disponibilidade
+    steps:
+      - intent: disponibilidade
+      - action: utter_disponibilidade
+
+  - rule: Responder filtros
+    steps:
+      - intent: filtros_carros
+      - action: utter_filtros_carros
+
+  - rule: Responder pagamento
+    steps:
+      - intent: pagamento
+      - action: utter_pagamento
+
+  - rule: Responder area admin
+    steps:
+      - intent: area_admin
+      - action: utter_area_admin
+
+  - rule: Responder recomendacao
+    steps:
+      - intent: recomendacao
+      - action: utter_recomendacao
+
+  - rule: Responder login cadastro
+    steps:
+      - intent: login_cadastro
+      - action: utter_login_cadastro
+
+  - rule: Responder problema login
+    steps:
+      - intent: problema_login
+      - action: utter_problema_login
+
+  - rule: Responder minhas reservas
+    steps:
+      - intent: minhas_reservas
+      - action: utter_minhas_reservas
+
+  - rule: Responder alterar reserva
+    steps:
+      - intent: alterar_reserva
+      - action: utter_alterar_reserva
+
+  - rule: Responder cancelar reserva
+    steps:
+      - intent: cancelar_reserva
+      - action: utter_cancelar_reserva
+
+  - rule: Responder suporte humano
+    steps:
+      - intent: suporte_humano
+      - action: utter_suporte_humano
+
+  - rule: Responder fora de escopo
+    steps:
+      - intent: fora_escopo
+      - action: utter_fora_escopo
+
+  - rule: Fallback geral
+    steps:
+      - intent: nlu_fallback
+      - action: utter_fallback

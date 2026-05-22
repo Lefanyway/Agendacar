@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, X, Send, Bot } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import api from '../services/api'
 
 export default function Chatbot() {
@@ -27,7 +28,14 @@ export default function Chatbot() {
 
     try {
       const { data } = await api.post('/chatbot', { mensagem: texto })
-      setMensagens(prev => [...prev, { de: 'bot', texto: data.resposta }])
+      setMensagens(prev => [
+  ...prev,
+  {
+    de: 'bot',
+    texto: data.resposta,
+    cards: data.cards || [],
+  },
+])
     } catch {
       setMensagens(prev => [...prev, { de: 'bot', texto: 'Erro de conexão. Tente novamente.' }])
     } finally {
@@ -74,39 +82,59 @@ export default function Chatbot() {
               style={{ minHeight: '260px', maxHeight: '320px' }}
             >
               {mensagens.map((msg, i) => (
-                <div key={i} className={`flex ${msg.de === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  {msg.de === 'bot' && (
-                    <div className="w-6 h-6 rounded-full bg-brand-deeper flex items-center justify-center mr-2 shrink-0 mt-0.5">
-                      <Bot size={12} className="text-white" />
-                    </div>
-                  )}
-                  <span
-                    className={`max-w-[78%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-                      msg.de === 'user'
-                        ? 'bg-brand-blue text-white rounded-br-sm'
-                        : 'bg-white text-gray-800 shadow-sm border border-gray-100 rounded-bl-sm'
-                    }`}
-                  >
-                    {msg.texto}
-                  </span>
-                </div>
-              ))}
-              {carregando && (
-                <div className="flex justify-start items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-brand-deeper flex items-center justify-center shrink-0">
-                    <Bot size={12} className="text-white" />
-                  </div>
-                  <div className="bg-white border border-gray-100 shadow-sm px-4 py-2.5 rounded-2xl rounded-bl-sm flex gap-1">
-                    {[0, 1, 2].map(i => (
-                      <span
-                        key={i}
-                        className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
-                        style={{ animationDelay: `${i * 150}ms` }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
+  <div key={i} className={`flex ${msg.de === 'user' ? 'justify-end' : 'justify-start'}`}>
+    {msg.de === 'bot' && (
+      <div className="w-6 h-6 rounded-full bg-brand-deeper flex items-center justify-center mr-2 shrink-0 mt-0.5">
+        <Bot size={12} className="text-white" />
+      </div>
+    )}
+
+    <div className={`max-w-[78%] ${msg.de === 'user' ? 'items-end' : 'items-start'} flex flex-col gap-2`}>
+      <span
+        className={`px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+          msg.de === 'user'
+            ? 'bg-brand-blue text-white rounded-br-sm'
+            : 'bg-white text-gray-800 shadow-sm border border-gray-100 rounded-bl-sm'
+        }`}
+      >
+        {msg.texto}
+      </span>
+
+      {msg.cards?.map((card) => (
+        <div
+          key={card.id}
+          className="w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
+        >
+          {card.imagem && (
+            <img
+              src={card.imagem}
+              alt={card.nome}
+              className="h-24 w-full object-contain bg-gray-100 p-2"
+            />
+          )}
+
+          <div className="p-3 space-y-1">
+            <p className="font-semibold text-sm text-gray-900">{card.nome}</p>
+            <p className="text-xs text-gray-500">
+              {card.tipo} • {card.capacidade} lugares • {card.transmissao}
+            </p>
+            <p className="text-xs text-gray-700">
+              R$ {Number(card.precoDia).toLocaleString('pt-BR')} / dia
+            </p>
+
+            <Link
+              to={card.url}
+              onClick={() => setAberto(false)}
+              className="mt-2 inline-flex w-full justify-center rounded-xl bg-brand-blue px-3 py-2 text-xs font-semibold text-white hover:bg-brand-deeper transition-colors"
+            >
+              {card.acaoTexto}
+            </Link>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+))}
               <div ref={fimRef} />
             </div>
 

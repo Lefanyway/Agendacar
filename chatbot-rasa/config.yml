@@ -1,0 +1,25 @@
+version: "3.1"
+
+language: pt
+
+pipeline:
+- name: WhitespaceTokenizer
+- name: RegexFeaturizer
+- name: LexicalSyntacticFeaturizer
+- name: CountVectorsFeaturizer
+- name: CountVectorsFeaturizer
+  analyzer: char_wb
+  min_ngram: 2
+  max_ngram: 4
+- name: DIETClassifier
+  epochs: 150
+  constrain_similarities: true
+- name: EntitySynonymMapper
+- name: FallbackClassifier
+  threshold: 0.72
+  ambiguity_threshold: 0.12
+
+policies:
+- name: MemoizationPolicy
+- name: RulePolicy
+assistant_id: 20260522-152100-frayed-cuisine

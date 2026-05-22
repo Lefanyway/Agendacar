@@ -1,0 +1,103 @@
+version: "3.1"
+
+intents:
+  - saudacao
+  - despedida
+  - agradecimento
+  - reservar_carro
+  - cancelar_reserva
+  - consultar_carros
+  - filtros_carros
+  - preco_carros
+  - disponibilidade
+  - pagamento
+  - area_admin
+  - recomendacao
+  - login_cadastro
+  - problema_login
+  - minhas_reservas
+  - alterar_reserva
+  - suporte_humano
+  - fora_escopo
+  - nlu_fallback
+
+responses:
+  utter_saudacao:
+    - text: "Olá! Sou o assistente do AgendaCar. Posso ajudar com carros, reservas, pagamento e recomendações."
+    - text: "Oi! Me diga o que você precisa: reservar, ver carros, cancelar ou pedir uma recomendação."
+
+  utter_despedida:
+    - text: "Até mais! Quando precisar, é só chamar."
+    - text: "Fechado. Volte quando quiser consultar ou reservar um carro."
+
+  utter_agradecimento:
+    - text: "De nada!"
+    - text: "Disponha! Estou por aqui."
+
+  utter_reservar_carro:
+    - text: "Para reservar, escolha um carro disponível, informe as datas e confirme a reserva."
+    - text: "A reserva é feita pela tela de carros. Selecione o veículo e o período desejado."
+
+  utter_cancelar_reserva:
+    - text: "Para cancelar, acesse suas reservas e clique na opção de cancelamento."
+    - text: "Você pode cancelar uma reserva pela área de reservas do usuário."
+
+  utter_consultar_carros:
+    - text: "Você pode ver os carros na tela inicial ou na lista de veículos."
+    - text: "A lista de carros mostra modelo, preço, capacidade, tipo e disponibilidade."
+
+  utter_filtros_carros:
+    - text: "Use os filtros para buscar por tipo, preço, disponibilidade ou capacidade."
+    - text: "Você pode filtrar e ordenar os carros para encontrar a melhor opção."
+
+  utter_preco_carros:
+    - text: "O preço aparece no card de cada carro, normalmente como valor por dia."
+    - text: "Consulte o card do veículo para ver o valor da diária."
+
+  utter_disponibilidade:
+    - text: "A disponibilidade aparece na lista de carros. Só veículos disponíveis podem ser reservados."
+    - text: "Confira na tela de carros se o veículo está marcado como disponível."
+
+  utter_pagamento:
+    - text: "O pagamento é feito após escolher o carro e confirmar o período da reserva."
+    - text: "Antes de pagar, confira o carro, as datas e o valor total."
+
+  utter_area_admin:
+    - text: "A área admin permite cadastrar, editar e remover carros."
+    - text: "Somente usuários administradores acessam o painel administrativo."
+
+  utter_recomendacao:
+    - text: "A recomendação usa orçamento, passageiros e tipo de viagem para sugerir um carro."
+    - text: "Informe seu perfil de uso e o sistema indica o veículo mais adequado."
+
+  utter_login_cadastro:
+    - text: "Você pode criar uma conta ou entrar com seu e-mail e senha na tela de login."
+    - text: "Para usar reservas, faça login ou cadastre uma conta."
+
+  utter_problema_login:
+    - text: "Confira se e-mail e senha estão corretos. Se continuar, tente sair e entrar novamente."
+    - text: "Verifique os dados digitados. O login precisa de e-mail e senha válidos."
+
+  utter_minhas_reservas:
+    - text: "Suas reservas ficam na área do usuário, na tela de reservas."
+    - text: "Acesse a área de reservas para consultar seus agendamentos."
+
+  utter_alterar_reserva:
+    - text: "Para alterar uma reserva, cancele a atual e faça uma nova com as datas corretas."
+    - text: "No momento, a forma mais segura é cancelar e criar uma nova reserva."
+
+  utter_suporte_humano:
+    - text: "Se o problema continuar, procure o suporte ou um administrador do sistema."
+    - text: "Para casos específicos, fale com o responsável pelo sistema."
+
+  utter_fora_escopo:
+    - text: "Não consigo ajudar com isso. Posso responder sobre carros, reservas, pagamento, login ou recomendações."
+    - text: "Essa dúvida foge do AgendaCar. Posso ajudar com reserva, carros, cancelamento ou pagamento."
+
+  utter_fallback:
+    - text: "Não entendi. Tente perguntar sobre carros, reserva, pagamento, cancelamento ou recomendação."
+    - text: "Pode reformular? Eu ajudo com carros, reservas, login, pagamento e área admin."
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
