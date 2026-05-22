@@ -50,17 +50,17 @@ const [ordenar, setOrdenar] = useState('')
       {/* Banners */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <Banner
-          variant="blue"
-          title="O melhor com o melhor, AgendaCar"
-          subtitle="Alugue carros premium com o melhor preço do mercado. Simples, rápido e seguro."
-          imgSrc="/img/porsche.png"
-          imgAlt="Porsche 911"
-        />
+  variant="dark"
+  title="AgendaCar, melhores escolhas"
+  subtitle="Sport, SUV ou SUV de luxo. Encontre o modelo ideal para cada viagem."
+  imgSrc="/img/cars/ferrari.png"
+  imgAlt="Camaro Amarelo"
+/>
         <Banner
           variant="dark"
           title="AgendaCar, melhores preços"
           subtitle="Sport, SUV ou Picape. Temos o modelo ideal para cada aventura."
-          imgSrc="/img/comprar-sense-200-tsi-automatica_5b696e8da4.png"
+          imgSrc="/img/cars/fiat.png"
           imgAlt="T-Cross"
         />
       </section>
@@ -136,9 +136,9 @@ const [ordenar, setOrdenar] = useState('')
     }}
   >
     <option value="">Todos os tipos</option>
-    <option value="Sport">Sport</option>
-    <option value="SUV">SUV</option>
-    <option value="Picape">Picape</option>
+  <option value="Sport">Sport</option>
+<option value="SUV">SUV</option>
+<option value="SUV Luxo">SUV Luxo</option>
   </select>
 
   <select
