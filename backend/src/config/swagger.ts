@@ -8,7 +8,7 @@ const options: swaggerJsdoc.Options = {
     info: {
       title: "AgendaCar API",
       version: "1.0.0",
-      description: "Documentação da API do sistema AgendaCar"
+      description: "Documentação da API RESTful do sistema AgendaCar"
     },
     servers: [
       {
@@ -18,7 +18,7 @@ const options: swaggerJsdoc.Options = {
     ],
     tags: [
       { name: "Health", description: "Status da API" },
-      { name: "Auth", description: "Cadastro e autenticação" },
+      { name: "Auth", description: "Cadastro, login e sessão" },
       { name: "Carros", description: "Consulta e administração de carros" },
       { name: "Reservas", description: "Agendamento e cancelamento de reservas" },
       { name: "Recomendações", description: "Recomendação inteligente de carros" }
@@ -51,6 +51,7 @@ const options: swaggerJsdoc.Options = {
         },
         Carro: {
           type: "object",
+          required: ["nome", "tipo", "capacidade", "transmissao", "tanque", "precoDia"],
           properties: {
             id: { type: "number", example: 1 },
             nome: { type: "string", example: "Porsche 911" },
@@ -70,23 +71,22 @@ const options: swaggerJsdoc.Options = {
             carroId: { type: "number", example: 1 },
             dataInicio: { type: "string", example: "2026-06-01" },
             dataFim: { type: "string", example: "2026-06-05" },
-            destino: { type: "string", example: "São Paulo" }
+            destino: { type: "string", example: "UniFECAF" }
           }
         },
         RecomendacaoCarro: {
-  type: "object",
-  properties: {
-    orcamentoDia: { type: "number", example: 300 },
-    passageiros: { type: "number", example: 5 },
-    tipoViagem: {
-      type: "string",
-      enum: ["economica", "familia", "esportiva", "luxo"],
-      example: "familia"
-    },
-    transmissao: { type: "string", example: "Automático" }
-  }
-}
-        
+          type: "object",
+          properties: {
+            orcamentoDia: { type: "number", example: 300 },
+            passageiros: { type: "number", example: 5 },
+            tipoViagem: {
+              type: "string",
+              enum: ["economica", "familia", "esportiva", "luxo"],
+              example: "familia"
+            },
+            transmissao: { type: "string", example: "Automático" }
+          }
+        }
       }
     },
     paths: {
@@ -95,9 +95,7 @@ const options: swaggerJsdoc.Options = {
           tags: ["Health"],
           summary: "Verifica se a API está funcionando",
           responses: {
-            200: {
-              description: "API funcionando"
-            }
+            200: { description: "API funcionando" }
           }
         }
       },
@@ -109,19 +107,13 @@ const options: swaggerJsdoc.Options = {
             required: true,
             content: {
               "application/json": {
-                schema: {
-                  $ref: "#/components/schemas/UsuarioCadastro"
-                }
+                schema: { $ref: "#/components/schemas/UsuarioCadastro" }
               }
             }
           },
           responses: {
-            201: {
-              description: "Usuário cadastrado com sucesso"
-            },
-            400: {
-              description: "Erro de validação"
-            }
+            201: { description: "Usuário cadastrado com sucesso" },
+            400: { description: "Erro de validação" }
           }
         }
       },
@@ -133,19 +125,24 @@ const options: swaggerJsdoc.Options = {
             required: true,
             content: {
               "application/json": {
-                schema: {
-                  $ref: "#/components/schemas/UsuarioLogin"
-                }
+                schema: { $ref: "#/components/schemas/UsuarioLogin" }
               }
             }
           },
           responses: {
-            200: {
-              description: "Login realizado com sucesso"
-            },
-            401: {
-              description: "Credenciais inválidas"
-            }
+            200: { description: "Login realizado com sucesso" },
+            401: { description: "Credenciais inválidas" }
+          }
+        }
+      },
+      "/auth/me": {
+        get: {
+          tags: ["Auth"],
+          summary: "Retorna os dados do usuário autenticado",
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: { description: "Dados do usuário" },
+            401: { description: "Token inválido ou ausente" }
           }
         }
       },
@@ -183,35 +180,25 @@ const options: swaggerJsdoc.Options = {
             }
           ],
           responses: {
-            200: {
-              description: "Lista de carros"
-            }
+            200: { description: "Lista de carros retornada com sucesso" }
           }
         },
         post: {
           tags: ["Carros"],
-          summary: "Cria um carro novo",
+          summary: "Cria um novo carro",
           security: [{ bearerAuth: [] }],
           requestBody: {
             required: true,
             content: {
               "application/json": {
-                schema: {
-                  $ref: "#/components/schemas/Carro"
-                }
+                schema: { $ref: "#/components/schemas/Carro" }
               }
             }
           },
           responses: {
-            201: {
-              description: "Carro criado"
-            },
-            401: {
-              description: "Token não informado"
-            },
-            403: {
-              description: "Apenas admin"
-            }
+            201: { description: "Carro criado com sucesso" },
+            401: { description: "Token não informado" },
+            403: { description: "Acesso permitido apenas para administrador" }
           }
         }
       },
@@ -229,12 +216,8 @@ const options: swaggerJsdoc.Options = {
             }
           ],
           responses: {
-            200: {
-              description: "Carro encontrado"
-            },
-            404: {
-              description: "Carro não encontrado"
-            }
+            200: { description: "Carro encontrado" },
+            404: { description: "Carro não encontrado" }
           }
         },
         put: {
@@ -253,16 +236,14 @@ const options: swaggerJsdoc.Options = {
             required: true,
             content: {
               "application/json": {
-                schema: {
-                  $ref: "#/components/schemas/Carro"
-                }
+                schema: { $ref: "#/components/schemas/Carro" }
               }
             }
           },
           responses: {
-            200: {
-              description: "Carro atualizado"
-            }
+            200: { description: "Carro atualizado com sucesso" },
+            401: { description: "Token não informado" },
+            403: { description: "Acesso permitido apenas para administrador" }
           }
         },
         delete: {
@@ -278,9 +259,9 @@ const options: swaggerJsdoc.Options = {
             }
           ],
           responses: {
-            200: {
-              description: "Carro removido"
-            }
+            200: { description: "Carro removido com sucesso" },
+            401: { description: "Token não informado" },
+            403: { description: "Acesso permitido apenas para administrador" }
           }
         }
       },
@@ -290,12 +271,8 @@ const options: swaggerJsdoc.Options = {
           summary: "Lista reservas do usuário logado",
           security: [{ bearerAuth: [] }],
           responses: {
-            200: {
-              description: "Lista de reservas"
-            },
-            401: {
-              description: "Token não informado"
-            }
+            200: { description: "Lista de reservas" },
+            401: { description: "Token não informado" }
           }
         },
         post: {
@@ -306,19 +283,14 @@ const options: swaggerJsdoc.Options = {
             required: true,
             content: {
               "application/json": {
-                schema: {
-                  $ref: "#/components/schemas/ReservaCriacao"
-                }
+                schema: { $ref: "#/components/schemas/ReservaCriacao" }
               }
             }
           },
           responses: {
-            201: {
-              description: "Reserva criada"
-            },
-            400: {
-              description: "Erro ao criar reserva"
-            }
+            201: { description: "Reserva criada com sucesso" },
+            400: { description: "Erro ao criar reserva" },
+            401: { description: "Token não informado" }
           }
         }
       },
@@ -336,35 +308,27 @@ const options: swaggerJsdoc.Options = {
             }
           ],
           responses: {
-            200: {
-              description: "Reserva cancelada"
-            },
-            400: {
-              description: "Erro ao cancelar reserva"
-            }, "/recomendacoes/carros": {
-  post: {
-    tags: ["Recomendações"],
-    summary: "Recomenda o carro mais adequado para o perfil informado",
-    requestBody: {
-      required: true,
-      content: {
-        "application/json": {
-          schema: {
-            $ref: "#/components/schemas/RecomendacaoCarro"
+            200: { description: "Reserva cancelada com sucesso" },
+            400: { description: "Erro ao cancelar reserva" },
+            401: { description: "Token não informado" }
           }
         }
-      }
-    },
-    responses: {
-      200: {
-        description: "Carro recomendado com score e justificativas"
       },
-      400: {
-        description: "Erro ao gerar recomendação"
-      }
-    }
-  }
-}
+      "/recomendacoes/carros": {
+        post: {
+          tags: ["Recomendações"],
+          summary: "Recomenda o carro mais adequado para o perfil informado",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/RecomendacaoCarro" }
+              }
+            }
+          },
+          responses: {
+            200: { description: "Carro recomendado com score e justificativas" },
+            400: { description: "Erro ao gerar recomendação" }
           }
         }
       }
