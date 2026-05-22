@@ -1,6 +1,10 @@
 import Usuario from "../models/Usuario";
 
 class UsuarioRepository {
+  async buscarPorId(id: number) {
+    return Usuario.findByPk(id);
+  }
+
   async buscarPorEmail(email: string) {
     return Usuario.findOne({ where: { email } });
   }

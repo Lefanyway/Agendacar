@@ -1,17 +1,21 @@
-import axios from "axios";
+import axios from 'axios'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3001",
-});
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001',
+})
 
 api.interceptors.request.use(config => {
-  const token = localStorage.getItem("token");
+  const sessao = localStorage.getItem('agendacar:sessao')
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (sessao) {
+    const dados = JSON.parse(sessao)
+
+    if (dados?.token) {
+      config.headers.Authorization = `Bearer ${dados.token}`
+    }
   }
 
-  return config;
-});
+  return config
+})
 
-export default api;
+export default api

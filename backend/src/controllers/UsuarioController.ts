@@ -19,6 +19,21 @@ class UsuarioController {
       return res.status(401).json({ erro: error.message });
     }
   }
+
+  async me(req: Request, res: Response) {
+    try {
+      const usuarioId = req.usuario?.id;
+
+      if (!usuarioId) {
+        return res.status(401).json({ erro: "Usuário não autenticado." });
+      }
+
+      const usuario = await usuarioService.perfil(usuarioId);
+      return res.json(usuario);
+    } catch (error: any) {
+      return res.status(401).json({ erro: error.message });
+    }
+  }
 }
 
 export default new UsuarioController();

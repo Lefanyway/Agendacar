@@ -14,8 +14,9 @@ interface LoginDTO {
 }
 
 class UsuarioService {
-async cadastrar(dados: CadastroDTO = {}) {
-  const { nome, email, senha } = dados;
+  async cadastrar(dados: CadastroDTO = {}) {
+    const { nome, email, senha } = dados;
+
     if (!nome || !email || !senha) {
       throw new Error("Nome, email e senha são obrigatórios.");
     }
@@ -36,19 +37,20 @@ async cadastrar(dados: CadastroDTO = {}) {
       nome,
       email,
       senha: senhaCriptografada,
-      role: "user"
+      role: "user",
     });
 
     return {
       id: usuario.id,
       nome: usuario.nome,
       email: usuario.email,
-      role: usuario.role
+      role: usuario.role,
     };
   }
 
-async login(dados: LoginDTO = {}) {
-  const { email, senha } = dados;
+  async login(dados: LoginDTO = {}) {
+    const { email, senha } = dados;
+
     if (!email || !senha) {
       throw new Error("Email e senha são obrigatórios.");
     }
@@ -69,20 +71,37 @@ async login(dados: LoginDTO = {}) {
       {
         id: usuario.id,
         email: usuario.email,
-        role: usuario.role
+        role: usuario.role,
       },
       this.getJwtSecret(),
       {
-        expiresIn: "1d"
+        expiresIn: "1d",
       }
     );
 
     return {
       token,
+      usuario: {
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+        role: usuario.role,
+      },
+    };
+  }
+
+  async perfil(usuarioId: number) {
+    const usuario = await usuarioRepository.buscarPorId(usuarioId);
+
+    if (!usuario) {
+      throw new Error("Usuário não encontrado.");
+    }
+
+    return {
       id: usuario.id,
       nome: usuario.nome,
       email: usuario.email,
-      role: usuario.role
+      role: usuario.role,
     };
   }
 
