@@ -1,0 +1,22 @@
+{
+  "0": "agradecimento",
+  "1": "alterar_reserva",
+  "2": "area_admin",
+  "3": "cancelar_reserva",
+  "4": "consultar_carros",
+  "5": "consultar_modelo",
+  "6": "despedida",
+  "7": "disponibilidade",
+  "8": "filtros_carros",
+  "9": "fora_escopo",
+  "10": "login_cadastro",
+  "11": "minhas_reservas",
+  "12": "pagamento",
+  "13": "preco_carros",
+  "14": "problema_login",
+  "15": "recomendacao",
+  "16": "reservar_carro",
+  "17": "reservar_modelo",
+  "18": "saudacao",
+  "19": "suporte_humano"
+}
