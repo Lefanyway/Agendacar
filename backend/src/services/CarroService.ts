@@ -31,6 +31,8 @@ class CarroService {
   }
 
   async buscarPorId(id: number) {
+    this.validarId(id);
+
     const carro = await this.repository.buscarPorId(id);
 
     if (!carro) {
@@ -46,6 +48,8 @@ class CarroService {
   }
 
   async atualizar(id: number, dados: CarroDTO) {
+    this.validarId(id);
+
     const carroFormatado = this.formatarDados(dados);
     const carro = await this.repository.atualizar(id, carroFormatado);
 
@@ -57,6 +61,8 @@ class CarroService {
   }
 
   async deletar(id: number) {
+    this.validarId(id);
+
     const removido = await this.repository.deletar(id);
 
     if (!removido) {
@@ -67,16 +73,42 @@ class CarroService {
   }
 
   private formatarDados(dados: CarroDTO): CarroPayload {
+    const capacidade = Number(dados.capacidade);
+    const tanque = Number(dados.tanque);
+    const precoDia = Number(dados.precoDia);
+
+    if (!dados.nome?.trim() || !dados.tipo?.trim() || !dados.transmissao?.trim()) {
+      throw new Error("Nome, tipo e transmissão são obrigatórios.");
+    }
+
+    if (!Number.isFinite(capacidade) || capacidade <= 0) {
+      throw new Error("Capacidade deve ser um número maior que zero.");
+    }
+
+    if (!Number.isFinite(tanque) || tanque <= 0) {
+      throw new Error("Tanque deve ser um número maior que zero.");
+    }
+
+    if (!Number.isFinite(precoDia) || precoDia <= 0) {
+      throw new Error("Preço por dia deve ser um número maior que zero.");
+    }
+
     return {
-      nome: dados.nome,
-      tipo: dados.tipo,
+      nome: dados.nome.trim(),
+      tipo: dados.tipo.trim(),
       imagem: dados.imagem || null,
-      capacidade: Number(dados.capacidade),
-      transmissao: dados.transmissao,
-      tanque: Number(dados.tanque),
-      precoDia: Number(dados.precoDia),
+      capacidade,
+      transmissao: dados.transmissao.trim(),
+      tanque,
+      precoDia,
       disponivel: this.normalizarDisponibilidade(dados.disponivel)
     };
+  }
+
+  private validarId(id: number) {
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new Error("ID inválido.");
+    }
   }
 
   private normalizarDisponibilidade(valor?: boolean | string): boolean {
