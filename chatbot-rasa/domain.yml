@@ -5,8 +5,10 @@ intents:
   - despedida
   - agradecimento
   - reservar_carro
+  - reservar_modelo
   - cancelar_reserva
   - consultar_carros
+  - consultar_modelo
   - filtros_carros
   - preco_carros
   - disponibilidade
@@ -38,6 +40,10 @@ responses:
     - text: "Para reservar, escolha um carro disponível, informe as datas e confirme a reserva."
     - text: "A reserva é feita pela tela de carros. Selecione o veículo e o período desejado."
 
+  utter_reservar_modelo:
+    - text: "Para reservar esse modelo, acesse a lista de carros, clique no veículo desejado e informe as datas da reserva."
+    - text: "Você consegue reservar esse modelo pelo card do veículo, desde que ele esteja disponível."
+
   utter_cancelar_reserva:
     - text: "Para cancelar, acesse suas reservas e clique na opção de cancelamento."
     - text: "Você pode cancelar uma reserva pela área de reservas do usuário."
@@ -45,6 +51,10 @@ responses:
   utter_consultar_carros:
     - text: "Você pode ver os carros na tela inicial ou na lista de veículos."
     - text: "A lista de carros mostra modelo, preço, capacidade, tipo e disponibilidade."
+
+  utter_consultar_modelo:
+    - text: "Você pode consultar esse modelo pela busca da tela inicial. O sistema mostra preço, capacidade, transmissão e disponibilidade."
+    - text: "Procure o modelo na lista de carros para ver os detalhes e iniciar uma reserva."
 
   utter_filtros_carros:
     - text: "Use os filtros para buscar por tipo, preço, disponibilidade ou capacidade."

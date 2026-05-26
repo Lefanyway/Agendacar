@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Car, CalendarCheck, LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../contexts/AuthContext'
 import { useState } from 'react'
 
 export default function Navbar() {
