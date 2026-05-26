@@ -9,8 +9,17 @@ async function seedAdmin() {
     await sequelize.authenticate();
     await sequelize.sync();
 
-    const email = "admin@agendacar.com";
-    const senha = "admin123";
+    const email = process.env.ADMIN_EMAIL;
+    const senha = process.env.ADMIN_PASSWORD;
+
+    if (!email || !senha) {
+      throw new Error("Defina ADMIN_EMAIL e ADMIN_PASSWORD para executar o seed de administrador.");
+    }
+
+    if (senha.length < 8) {
+      throw new Error("ADMIN_PASSWORD deve ter no mínimo 8 caracteres.");
+    }
+
     const senhaCriptografada = await bcrypt.hash(senha, 10);
 
     const usuarioExistente = await Usuario.findOne({
@@ -25,8 +34,7 @@ async function seedAdmin() {
       });
 
       console.log("Usuário admin já existia e teve nome, senha e role atualizados.");
-      console.log("Email: admin@agendacar.com");
-      console.log("Senha: admin123");
+      console.log(`Email: ${email}`);
       return;
     }
 
@@ -38,8 +46,7 @@ async function seedAdmin() {
     });
 
     console.log("Usuário admin criado com sucesso.");
-    console.log("Email: admin@agendacar.com");
-    console.log("Senha: admin123");
+    console.log(`Email: ${email}`);
   } catch (error) {
     console.error("Erro ao criar usuário admin:", error);
     process.exit(1);
