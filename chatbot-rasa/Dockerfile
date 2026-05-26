@@ -8,6 +8,7 @@ USER root
 
 ENV RASA_TELEMETRY_ENABLED=false
 ENV PORT=10000
+ENV RASA_INTERNAL_PORT=5005
 
 RUN rasa train --config config.yml --domain domain.yml --data data
 
@@ -15,4 +16,4 @@ EXPOSE 10000
 
 ENTRYPOINT []
 
-CMD ["rasa", "run", "--enable-api", "--cors", "*", "-i", "0.0.0.0", "-p", "10000"]
+CMD ["python", "render_proxy.py"]
