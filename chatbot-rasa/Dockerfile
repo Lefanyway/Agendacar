@@ -7,11 +7,12 @@ COPY chatbot-rasa/ /app/
 USER root
 
 ENV RASA_TELEMETRY_ENABLED=false
+ENV PORT=10000
 
 RUN rasa train --config config.yml --domain domain.yml --data data
 
-EXPOSE 5005
+EXPOSE 10000
 
 ENTRYPOINT []
 
-CMD ["sh", "-c", "rasa run --enable-api --cors '*' --interface 0.0.0.0 --port ${PORT:-5005}"]
+CMD ["rasa", "run", "--enable-api", "--cors", "*", "-i", "0.0.0.0", "-p", "10000"]
