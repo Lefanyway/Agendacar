@@ -2,7 +2,6 @@ import json
 import os
 import subprocess
 import threading
-import time
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -27,29 +26,78 @@ def start_rasa():
     ]
 
     print(f"Iniciando Rasa interno em {RASA_URL}", flush=True)
+
     subprocess.Popen(command)
 
 
-def fallback_response(body):
-    sender = "usuario"
-
+def extrair_mensagem(body):
     try:
         payload = json.loads(body.decode("utf-8") or "{}")
-        sender = payload.get("sender") or sender
+        sender = payload.get("sender") or "usuario"
+        message = payload.get("message") or payload.get("mensagem") or ""
+        return sender, message.lower()
     except Exception:
-        pass
+        return "usuario", ""
+
+
+def resposta_inteligente(body):
+    sender, mensagem = extrair_mensagem(body)
+
+    if any(palavra in mensagem for palavra in ["oi", "olá", "ola", "bom dia", "boa tarde", "boa noite", "ajuda"]):
+        texto = "Olá! Sou o assistente do AgendaCar. Posso ajudar com carros, reservas, pagamento, login e área administrativa."
+
+    elif any(palavra in mensagem for palavra in ["reservar", "reserva", "alugar", "agendar"]):
+        texto = "Para reservar, escolha um carro disponível, acesse os detalhes do veículo, informe as datas e confirme a reserva."
+
+    elif any(palavra in mensagem for palavra in ["cancelar", "cancelamento"]):
+        texto = "Para cancelar uma reserva, acesse a área de reservas do usuário e clique na opção de cancelamento."
+
+    elif any(palavra in mensagem for palavra in ["pagamento", "pagar", "cartão", "pix", "valor"]):
+        texto = "O pagamento é feito após escolher o carro e confirmar o período da reserva. Antes de finalizar, confira o veículo, as datas e o valor total."
+
+    elif any(palavra in mensagem for palavra in ["login", "entrar", "cadastro", "cadastrar", "senha"]):
+        texto = "Você pode criar uma conta ou entrar com e-mail e senha pela tela de login. Para acessar reservas, é necessário estar autenticado."
+
+    elif any(palavra in mensagem for palavra in ["admin", "administrador", "painel", "gerenciar"]):
+        texto = "A área administrativa permite cadastrar, editar e remover carros. O acesso é restrito a usuários administradores."
+
+    elif any(palavra in mensagem for palavra in ["carro", "carros", "veículo", "veiculos", "modelo", "disponível", "disponiveis"]):
+        texto = "Você pode consultar os carros na tela inicial. A lista mostra modelo, preço, capacidade, transmissão e disponibilidade."
+
+    elif any(palavra in mensagem for palavra in ["filtro", "filtrar", "ordenar", "preço", "preco"]):
+        texto = "Use os filtros e a ordenação para buscar carros por tipo, preço, disponibilidade ou capacidade."
+
+    elif any(palavra in mensagem for palavra in ["recomendação", "recomendacao", "recomendar", "indicar"]):
+        texto = "A recomendação considera orçamento, quantidade de passageiros e tipo de viagem para sugerir uma opção adequada."
+
+    elif any(palavra in mensagem for palavra in ["obrigado", "obrigada", "valeu", "vlw", "show"]):
+        texto = "De nada! Quando precisar, é só chamar."
+
+    elif any(palavra in mensagem for palavra in ["tchau", "sair", "até", "ate"]):
+        texto = "Até mais! Volte quando quiser consultar ou reservar um carro."
+
+    else:
+        texto = "Não entendi totalmente. Posso ajudar com reserva, carros disponíveis, pagamento, login, cadastro ou área administrativa."
 
     return [
         {
             "recipient_id": sender,
-            "text": "O assistente está inicializando. Tente novamente em alguns segundos."
+            "text": texto
         }
     ]
 
 
+def rasa_disponivel():
+    try:
+        with urllib.request.urlopen(f"{RASA_URL}/version", timeout=2) as response:
+            return response.status < 500
+    except Exception:
+        return False
+
+
 class ProxyHandler(BaseHTTPRequestHandler):
     def _send_json(self, status_code, data):
-        response = json.dumps(data).encode("utf-8")
+        response = json.dumps(data, ensure_ascii=False).encode("utf-8")
 
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -71,8 +119,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
         if self.path in ["/", "/health"]:
             self._send_json(200, {
                 "status": "ok",
-                "message": "AgendaCar Rasa proxy funcionando",
-                "rasa_url": RASA_URL
+                "message": "AgendaCar chatbot proxy funcionando",
+                "rasa_url": RASA_URL,
+                "rasa_disponivel": rasa_disponivel()
             })
             return
 
@@ -84,7 +133,12 @@ class ProxyHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers.get("Content-Length", "0"))
         body = self.rfile.read(content_length)
 
-        target_url = f"{RASA_URL}{self.path}"
+        path = self.path
+
+        if path == "/":
+            path = "/webhooks/rest/webhook"
+
+        target_url = f"{RASA_URL}{path}"
 
         try:
             request = urllib.request.Request(
@@ -96,18 +150,20 @@ class ProxyHandler(BaseHTTPRequestHandler):
                 method="POST"
             )
 
-            with urllib.request.urlopen(request, timeout=8) as response:
+            with urllib.request.urlopen(request, timeout=10) as response:
                 response_body = response.read()
-                response_data = json.loads(response_body.decode("utf-8") or "[]")
+                response_text = response_body.decode("utf-8") or "[]"
+
+                try:
+                    response_data = json.loads(response_text)
+                except Exception:
+                    response_data = resposta_inteligente(body)
+
                 self._send_json(response.status, response_data)
 
-        except urllib.error.URLError as error:
-            print(f"Rasa ainda indisponível: {error}", flush=True)
-            self._send_json(200, fallback_response(body))
-
         except Exception as error:
-            print(f"Erro no proxy do Rasa: {error}", flush=True)
-            self._send_json(200, fallback_response(body))
+            print(f"Rasa indisponível. Usando fallback inteligente: {error}", flush=True)
+            self._send_json(200, resposta_inteligente(body))
 
     def log_message(self, format, *args):
         print(f"[proxy] {self.address_string()} - {format % args}", flush=True)
