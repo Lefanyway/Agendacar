@@ -18,10 +18,15 @@ class ReservaService {
   ) {}
 
   listarPorUsuario(usuarioId: number) {
+    this.validarId(usuarioId, "Usuário inválido.");
+
     return this.reservaRepo.listarPorUsuario(usuarioId);
   }
 
   async criar({ usuarioId, carroId, dataInicio, dataFim, destino }: CriarReservaDTO) {
+    this.validarId(usuarioId, "Usuário inválido.");
+    this.validarId(carroId, "Carro inválido.");
+
     if (!usuarioId || !carroId || !dataInicio || !dataFim) {
       throw new Error("Carro, data inicial e data final são obrigatórios.");
     }
@@ -62,6 +67,9 @@ class ReservaService {
   }
 
   async cancelar(id: number, usuarioId: number) {
+    this.validarId(id, "Reserva inválida.");
+    this.validarId(usuarioId, "Usuário inválido.");
+
     const reserva = await this.reservaRepo.buscarPorId(id);
 
     if (!reserva) {
@@ -77,6 +85,12 @@ class ReservaService {
     }
 
     return this.reservaRepo.cancelar(id);
+  }
+
+  private validarId(id: number, mensagem: string) {
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new Error(mensagem);
+    }
   }
 }
 

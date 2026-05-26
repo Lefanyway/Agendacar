@@ -51,7 +51,8 @@ class ReservaController {
 
       return res.json(reserva);
     } catch (error: any) {
-      return res.status(400).json({ erro: error.message });
+      const status = error.message === "Reserva não encontrada." ? 404 : 400;
+      return res.status(status).json({ erro: error.message });
     }
   }
 }
