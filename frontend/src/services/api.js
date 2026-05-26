@@ -8,10 +8,14 @@ api.interceptors.request.use(config => {
   const sessao = localStorage.getItem('agendacar:sessao')
 
   if (sessao) {
-    const dados = JSON.parse(sessao)
+    try {
+      const dados = JSON.parse(sessao)
 
-    if (dados?.token) {
-      config.headers.Authorization = `Bearer ${dados.token}`
+      if (dados?.token) {
+        config.headers.Authorization = `Bearer ${dados.token}`
+      }
+    } catch {
+      localStorage.removeItem('agendacar:sessao')
     }
   }
 

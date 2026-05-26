@@ -143,8 +143,13 @@ export default function Pagamento() {
   useEffect(() => {
     const raw = localStorage.getItem('dadosReserva')
     if (!raw) { navigate('/home'); return }
-    setDados(JSON.parse(raw))
-  }, [])
+    try {
+      setDados(JSON.parse(raw))
+    } catch {
+      localStorage.removeItem('dadosReserva')
+      navigate('/home')
+    }
+  }, [navigate])
 
   /* detectar bandeira */
   function detectarBandeira(num) {
