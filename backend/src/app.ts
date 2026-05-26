@@ -9,8 +9,36 @@ import { setupSwagger } from "./config/swagger";
 
 const app = express();
 
+const allowedOrigins = (process.env.FRONTEND_URL || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const isProduction = process.env.NODE_ENV === "production";
+const devOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000"
+];
+
+app.disable("x-powered-by");
+
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  next();
+});
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "*"
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin) || (!isProduction && devOrigins.includes(origin))) {
+      callback(null, true);
+      return;
+    }
+
+    callback(null, false);
+  }
 }));
 
 app.use(express.json());
