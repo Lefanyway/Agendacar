@@ -1,5 +1,7 @@
 import reservaRepository from "../repositories/ReservaRepository";
 import carroRepository from "../repositories/CarroRepository";
+import { IReservaRepository } from "../contracts/ReservaRepositoryContract";
+import { ICarroRepository } from "../contracts/CarroRepositoryContract";
 
 interface CriarReservaDTO {
   usuarioId: number;
@@ -10,8 +12,13 @@ interface CriarReservaDTO {
 }
 
 class ReservaService {
+  constructor(
+    private readonly reservaRepo: IReservaRepository = reservaRepository,
+    private readonly carroRepo: ICarroRepository = carroRepository
+  ) {}
+
   listarPorUsuario(usuarioId: number) {
-    return reservaRepository.listarPorUsuario(usuarioId);
+    return this.reservaRepo.listarPorUsuario(usuarioId);
   }
 
   async criar({ usuarioId, carroId, dataInicio, dataFim, destino }: CriarReservaDTO) {
@@ -19,7 +26,7 @@ class ReservaService {
       throw new Error("Carro, data inicial e data final são obrigatórios.");
     }
 
-    const carro = await carroRepository.buscarPorId(carroId);
+    const carro = await this.carroRepo.buscarPorId(carroId);
 
     if (!carro) {
       throw new Error("Carro não encontrado.");
@@ -44,7 +51,7 @@ class ReservaService {
     const dias = Math.ceil(diferencaEmMs / (1000 * 60 * 60 * 24));
     const valorTotal = dias * carro.precoDia;
 
-    return reservaRepository.criar({
+    return this.reservaRepo.criar({
       UsuarioId: usuarioId,
       CarroId: carroId,
       dataInicio,
@@ -55,7 +62,7 @@ class ReservaService {
   }
 
   async cancelar(id: number, usuarioId: number) {
-    const reserva = await reservaRepository.buscarPorId(id);
+    const reserva = await this.reservaRepo.buscarPorId(id);
 
     if (!reserva) {
       throw new Error("Reserva não encontrada.");
@@ -69,7 +76,7 @@ class ReservaService {
       throw new Error("Esta reserva já está cancelada.");
     }
 
-    return reservaRepository.cancelar(id);
+    return this.reservaRepo.cancelar(id);
   }
 }
 

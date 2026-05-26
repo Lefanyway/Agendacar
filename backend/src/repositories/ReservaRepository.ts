@@ -1,7 +1,11 @@
 import { Carro, Reserva } from "../models";
+import {
+  CriarReservaRepositoryDTO,
+  IReservaRepository
+} from "../contracts/ReservaRepositoryContract";
 
-class ReservaRepository {
-  async listarPorUsuario(usuarioId: number) {
+class ReservaRepository implements IReservaRepository {
+  async listarPorUsuario(usuarioId: number): Promise<Reserva[]> {
     return Reserva.findAll({
       where: { UsuarioId: usuarioId },
       include: [
@@ -13,7 +17,7 @@ class ReservaRepository {
     });
   }
 
-  async buscarPorId(id: number) {
+  async buscarPorId(id: number): Promise<Reserva | null> {
     return Reserva.findByPk(id, {
       include: [
         {
@@ -23,18 +27,11 @@ class ReservaRepository {
     });
   }
 
-  async criar(dados: {
-    UsuarioId: number;
-    CarroId: number;
-    dataInicio: string;
-    dataFim: string;
-    valorTotal: number;
-    destino?: string | null;
-  }) {
+  async criar(dados: CriarReservaRepositoryDTO): Promise<Reserva> {
     return Reserva.create(dados);
   }
 
-  async cancelar(id: number) {
+  async cancelar(id: number): Promise<Reserva | null> {
     const reserva = await Reserva.findByPk(id);
 
     if (!reserva) {

@@ -1,8 +1,28 @@
 import carroRepository from "../repositories/CarroRepository";
+import {
+  CarroPayload,
+  ICarroRepository,
+  ListarCarrosParams
+} from "../contracts/CarroRepositoryContract";
+
+interface CarroDTO {
+  nome: string;
+  tipo: string;
+  imagem?: string | null;
+  capacidade: number | string;
+  transmissao: string;
+  tanque: number | string;
+  precoDia: number | string;
+  disponivel?: boolean | string;
+}
 
 class CarroService {
-  listar(query: any) {
-    return carroRepository.listar({
+  constructor(
+    private readonly repository: ICarroRepository = carroRepository
+  ) {}
+
+  listar(query: ListarCarrosParams) {
+    return this.repository.listar({
       busca: query.busca,
       tipo: query.tipo,
       disponivel: query.disponivel,
@@ -11,7 +31,7 @@ class CarroService {
   }
 
   async buscarPorId(id: number) {
-    const carro = await carroRepository.buscarPorId(id);
+    const carro = await this.repository.buscarPorId(id);
 
     if (!carro) {
       throw new Error("Carro não encontrado.");
@@ -20,14 +40,14 @@ class CarroService {
     return carro;
   }
 
-  criar(dados: any) {
+  criar(dados: CarroDTO) {
     const carroFormatado = this.formatarDados(dados);
-    return carroRepository.criar(carroFormatado);
+    return this.repository.criar(carroFormatado);
   }
 
-  async atualizar(id: number, dados: any) {
+  async atualizar(id: number, dados: CarroDTO) {
     const carroFormatado = this.formatarDados(dados);
-    const carro = await carroRepository.atualizar(id, carroFormatado);
+    const carro = await this.repository.atualizar(id, carroFormatado);
 
     if (!carro) {
       throw new Error("Carro não encontrado.");
@@ -37,7 +57,7 @@ class CarroService {
   }
 
   async deletar(id: number) {
-    const removido = await carroRepository.deletar(id);
+    const removido = await this.repository.deletar(id);
 
     if (!removido) {
       throw new Error("Carro não encontrado.");
@@ -46,7 +66,7 @@ class CarroService {
     return { msg: "Carro removido." };
   }
 
-  private formatarDados(dados: any) {
+  private formatarDados(dados: CarroDTO): CarroPayload {
     return {
       nome: dados.nome,
       tipo: dados.tipo,
@@ -55,8 +75,20 @@ class CarroService {
       transmissao: dados.transmissao,
       tanque: Number(dados.tanque),
       precoDia: Number(dados.precoDia),
-      disponivel: dados.disponivel ?? true
+      disponivel: this.normalizarDisponibilidade(dados.disponivel)
     };
+  }
+
+  private normalizarDisponibilidade(valor?: boolean | string): boolean {
+    if (typeof valor === "boolean") {
+      return valor;
+    }
+
+    if (typeof valor === "string") {
+      return valor !== "false";
+    }
+
+    return true;
   }
 }
 

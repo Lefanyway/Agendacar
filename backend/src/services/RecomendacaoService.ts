@@ -1,4 +1,5 @@
 import carroRepository from "../repositories/CarroRepository";
+import { ICarroRepository } from "../contracts/CarroRepositoryContract";
 
 interface RecomendacaoDTO {
   orcamentoDia?: number;
@@ -8,8 +9,12 @@ interface RecomendacaoDTO {
 }
 
 class RecomendacaoService {
+  constructor(
+    private readonly carroRepo: ICarroRepository = carroRepository
+  ) {}
+
   async recomendar(dados: RecomendacaoDTO) {
-    const carros = await carroRepository.listar({
+    const carros = await this.carroRepo.listar({
       disponivel: "true"
     });
 
@@ -49,7 +54,10 @@ class RecomendacaoService {
         motivos.push("boa opção para viagem em família");
       }
 
-      if (dados.tipoViagem === "esportiva" && carro.tipo.toLowerCase().includes("sport")) {
+      if (
+        dados.tipoViagem === "esportiva" &&
+        carro.tipo.toLowerCase().includes("sport")
+      ) {
         score += 30;
         motivos.push("perfil esportivo compatível com a viagem");
       }
