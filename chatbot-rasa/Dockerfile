@@ -2,12 +2,16 @@ FROM rasa/rasa:3.6.21-full
 
 WORKDIR /app
 
-COPY . /app
+COPY chatbot-rasa/ /app/
 
 USER root
 
-RUN rasa train
+ENV RASA_TELEMETRY_ENABLED=false
+
+RUN rasa train --config config.yml --domain domain.yml --data data
 
 EXPOSE 5005
+
+ENTRYPOINT []
 
 CMD ["sh", "-c", "rasa run --enable-api --cors '*' --host 0.0.0.0 --port ${PORT:-5005}"]
