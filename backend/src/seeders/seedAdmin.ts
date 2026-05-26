@@ -11,6 +11,7 @@ async function seedAdmin() {
 
     const email = "admin@agendacar.com";
     const senha = "admin123";
+    const senhaCriptografada = await bcrypt.hash(senha, 10);
 
     const usuarioExistente = await Usuario.findOne({
       where: { email }
@@ -19,14 +20,15 @@ async function seedAdmin() {
     if (usuarioExistente) {
       await usuarioExistente.update({
         nome: "Administrador",
+        senha: senhaCriptografada,
         role: "admin"
       });
 
-      console.log("Usuário admin já existia e foi atualizado.");
+      console.log("Usuário admin já existia e teve nome, senha e role atualizados.");
+      console.log("Email: admin@agendacar.com");
+      console.log("Senha: admin123");
       return;
     }
-
-    const senhaCriptografada = await bcrypt.hash(senha, 10);
 
     await Usuario.create({
       nome: "Administrador",
