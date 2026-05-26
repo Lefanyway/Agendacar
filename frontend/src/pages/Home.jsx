@@ -51,15 +51,15 @@ const [ordenar, setOrdenar] = useState('')
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <Banner
   variant="dark"
-  title="AgendaCar, melhores escolhas"
-  subtitle="Sport, SUV ou SUV de luxo. Encontre o modelo ideal para cada viagem."
+  title="Dirija o carro certo hoje"
+  subtitle="Modelos esportivos, SUVs e luxo com reserva simples para a sua proxima experiencia."
   imgSrc="/img/cars/ferrari.png"
   imgAlt="Camaro Amarelo"
 />
         <Banner
           variant="dark"
-          title="AgendaCar, melhores preços"
-          subtitle="Sport, SUV ou Picape. Temos o modelo ideal para cada aventura."
+          title="Alugue mais pagando menos"
+          subtitle="Compare opcoes, escolha seu veiculo e garanta uma diaria com excelente custo-beneficio."
           imgSrc="/img/cars/fiat.png"
           imgAlt="T-Cross"
         />
