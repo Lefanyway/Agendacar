@@ -1,33 +1,9 @@
 import json
 import os
-import subprocess
-import threading
-import urllib.error
-import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
 PUBLIC_PORT = int(os.environ.get("PORT", "10000"))
-RASA_INTERNAL_PORT = int(os.environ.get("RASA_INTERNAL_PORT", "5005"))
-RASA_URL = f"http://127.0.0.1:{RASA_INTERNAL_PORT}"
-
-
-def start_rasa():
-    command = [
-        "rasa",
-        "run",
-        "--enable-api",
-        "--cors",
-        "*",
-        "-i",
-        "127.0.0.1",
-        "-p",
-        str(RASA_INTERNAL_PORT),
-    ]
-
-    print(f"Iniciando Rasa interno em {RASA_URL}", flush=True)
-
-    subprocess.Popen(command)
 
 
 def extrair_mensagem(body):
@@ -40,7 +16,7 @@ def extrair_mensagem(body):
         return "usuario", ""
 
 
-def resposta_inteligente(body):
+def gerar_resposta(body):
     sender, mensagem = extrair_mensagem(body)
 
     if any(palavra in mensagem for palavra in ["oi", "olá", "ola", "bom dia", "boa tarde", "boa noite", "ajuda"]):
@@ -52,7 +28,7 @@ def resposta_inteligente(body):
     elif any(palavra in mensagem for palavra in ["cancelar", "cancelamento"]):
         texto = "Para cancelar uma reserva, acesse a área de reservas do usuário e clique na opção de cancelamento."
 
-    elif any(palavra in mensagem for palavra in ["pagamento", "pagar", "cartão", "pix", "valor"]):
+    elif any(palavra in mensagem for palavra in ["pagamento", "pagar", "cartão", "cartao", "pix", "valor"]):
         texto = "O pagamento é feito após escolher o carro e confirmar o período da reserva. Antes de finalizar, confira o veículo, as datas e o valor total."
 
     elif any(palavra in mensagem for palavra in ["login", "entrar", "cadastro", "cadastrar", "senha"]):
@@ -87,15 +63,7 @@ def resposta_inteligente(body):
     ]
 
 
-def rasa_disponivel():
-    try:
-        with urllib.request.urlopen(f"{RASA_URL}/version", timeout=2) as response:
-            return response.status < 500
-    except Exception:
-        return False
-
-
-class ProxyHandler(BaseHTTPRequestHandler):
+class ChatbotHandler(BaseHTTPRequestHandler):
     def _send_json(self, status_code, data):
         response = json.dumps(data, ensure_ascii=False).encode("utf-8")
 
@@ -103,25 +71,30 @@ class ProxyHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, HEAD")
         self.send_header("Content-Length", str(len(response)))
         self.end_headers()
         self.wfile.write(response)
+
+    def do_HEAD(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
 
     def do_OPTIONS(self):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, HEAD")
         self.end_headers()
 
     def do_GET(self):
         if self.path in ["/", "/health"]:
             self._send_json(200, {
                 "status": "ok",
-                "message": "AgendaCar chatbot proxy funcionando",
-                "rasa_url": RASA_URL,
-                "rasa_disponivel": rasa_disponivel()
+                "message": "AgendaCar chatbot funcionando",
+                "modo": "proxy"
             })
             return
 
@@ -133,48 +106,16 @@ class ProxyHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers.get("Content-Length", "0"))
         body = self.rfile.read(content_length)
 
-        path = self.path
-
-        if path == "/":
-            path = "/webhooks/rest/webhook"
-
-        target_url = f"{RASA_URL}{path}"
-
-        try:
-            request = urllib.request.Request(
-                target_url,
-                data=body,
-                headers={
-                    "Content-Type": self.headers.get("Content-Type", "application/json")
-                },
-                method="POST"
-            )
-
-            with urllib.request.urlopen(request, timeout=10) as response:
-                response_body = response.read()
-                response_text = response_body.decode("utf-8") or "[]"
-
-                try:
-                    response_data = json.loads(response_text)
-                except Exception:
-                    response_data = resposta_inteligente(body)
-
-                self._send_json(response.status, response_data)
-
-        except Exception as error:
-            print(f"Rasa indisponível. Usando fallback inteligente: {error}", flush=True)
-            self._send_json(200, resposta_inteligente(body))
+        self._send_json(200, gerar_resposta(body))
 
     def log_message(self, format, *args):
-        print(f"[proxy] {self.address_string()} - {format % args}", flush=True)
+        print(f"[chatbot] {self.address_string()} - {format % args}", flush=True)
 
 
 if __name__ == "__main__":
-    threading.Thread(target=start_rasa, daemon=True).start()
+    server = ThreadingHTTPServer(("0.0.0.0", PUBLIC_PORT), ChatbotHandler)
 
-    server = ThreadingHTTPServer(("0.0.0.0", PUBLIC_PORT), ProxyHandler)
-
-    print(f"Proxy HTTP aberto em 0.0.0.0:{PUBLIC_PORT}", flush=True)
-    print("Render já consegue detectar a porta.", flush=True)
+    print(f"Chatbot HTTP aberto em 0.0.0.0:{PUBLIC_PORT}", flush=True)
+    print("Serviço pronto para receber mensagens.", flush=True)
 
     server.serve_forever()
