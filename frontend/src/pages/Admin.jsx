@@ -17,8 +17,12 @@ export default function Admin() {
   const [msg, setMsg] = useState({ tipo: '', texto: '' })
 
   async function carregar() {
-    const { data } = await api.get('/carros')
-    setCarros(data)
+    try {
+      const { data } = await api.get('/carros')
+      setCarros(data)
+    } catch (err) {
+      setMsg({ tipo: 'erro', texto: err.response?.data?.erro || 'Erro ao carregar carros.' })
+    }
   }
 
   useEffect(() => { carregar() }, [])
@@ -56,8 +60,12 @@ export default function Admin() {
 
   async function excluir(id) {
     if (!window.confirm('Excluir este carro permanentemente?')) return
-    await api.delete(`/carros/${id}`)
-    carregar()
+    try {
+      await api.delete(`/carros/${id}`)
+      carregar()
+    } catch (err) {
+      setMsg({ tipo: 'erro', texto: err.response?.data?.erro || 'Erro ao excluir carro.' })
+    }
   }
 
   const formatBRL = v => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(v)
