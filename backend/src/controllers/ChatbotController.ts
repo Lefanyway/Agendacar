@@ -8,7 +8,7 @@ class ChatbotController {
 
       if (!mensagem || typeof mensagem !== "string") {
         return res.status(400).json({
-          resposta: "Nao consegui entender com seguranca. Pode reformular sua pergunta?",
+          resposta: "Não entendi com segurança. Pode digitar de outra forma?",
           intent: "fallback",
           confidence: 0,
           showCards: false,
@@ -25,7 +25,7 @@ class ChatbotController {
       return res.json(resposta);
     } catch {
       return res.status(500).json({
-        resposta: "Tive um problema ao processar sua mensagem. Pode tentar digitar de novo?",
+        resposta: "Tive um problema ao processar sua mensagem. Tente digitar novamente.",
         intent: "erro",
         confidence: 0,
         showCards: false,

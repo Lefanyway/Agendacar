@@ -87,45 +87,45 @@ const INTENTS_COM_CARDS = new Set<ChatbotIntent>([
 
 const RESPOSTAS: Record<ChatbotIntent, string> = {
   saudacao:
-    "Ola! Posso ajudar com carros, reservas, pagamento, login, cancelamento, recomendacoes e area administrativa. Sobre qual assunto voce quer falar?",
+    "Olá! Posso ajudar com carros, reservas, pagamento, login e suporte do AgendaCar.",
   agradecimento:
-    "De nada! Quando quiser consultar carros ou tirar duvidas sobre reservas, pode chamar.",
+    "De nada! Quando precisar, posso ajudar com carros e reservas.",
   despedida:
-    "Ate mais! Quando quiser consultar ou reservar um carro, estou por aqui.",
+    "Até mais! Quando precisar, estou por aqui.",
   ajuda_geral:
-    "Posso ajudar com carros disponiveis, reserva, cancelamento, pagamento, login, recomendacoes e area administrativa.",
+    "Posso ajudar com carros, reservas, pagamento, login e suporte do AgendaCar.",
   consultar_carros:
-    "Encontrei os carros disponiveis no sistema. Confira os cards abaixo.",
+    "Encontrei os carros disponíveis. Confira os cards abaixo.",
   reservar_carro:
-    "Claro. Escolha um carro disponivel nos cards abaixo. Depois informe o periodo da reserva e confirme pelo sistema.",
+    "Escolha um carro disponível nos cards abaixo e informe o período da reserva.",
   recomendacao_carro:
-    "Encontrei algumas opcoes com base no que voce pediu. Confira os cards abaixo e abra um carro para ver os detalhes.",
+    "Encontrei algumas opções para você. Confira os cards abaixo.",
   filtros_carros:
     "Encontrei alguns carros com esse perfil. Confira os cards abaixo.",
   consultar_modelo:
     "Encontrei este modelo na frota. Confira o card abaixo.",
   cancelar_reserva:
-    "Entendi que voce quer cancelar uma reserva. Eu nao cancelo automaticamente pelo chat. Acesse Minhas Reservas, escolha a reserva desejada e use a opcao de cancelamento.",
+    "Para cancelar, acesse Minhas Reservas, selecione a reserva e clique em cancelar.",
   alterar_reserva:
-    "Para alterar uma reserva, acesse Minhas Reservas e selecione a reserva desejada. Se o sistema nao permitir edicao direta, cancele e faca uma nova reserva com os dados corretos.",
+    "Para alterar, acesse Minhas Reservas e selecione a reserva desejada.",
   minhas_reservas:
-    "Voce pode consultar suas reservas acessando Minhas Reservas apos fazer login.",
+    "Você pode consultar suas reservas em Minhas Reservas após fazer login.",
   pagamento:
-    "O pagamento deve ser feito na etapa de finalizacao da reserva. Confira as opcoes disponiveis diretamente na tela de pagamento.",
+    "O pagamento é feito na finalização da reserva. Confira as opções disponíveis na tela de pagamento.",
   login_cadastro:
-    "Use a tela de login para entrar com email e senha. Se ainda nao tiver conta, faca o cadastro antes de reservar.",
+    "Para acessar sua conta, use a tela de login ou cadastro.",
   problema_login:
-    "Confira email e senha digitados. Se o problema continuar, tente cadastrar novamente ou procure suporte. Por seguranca, nao envie senha pelo chat.",
+    "Verifique seu e-mail e senha. Se o erro continuar, tente redefinir o acesso.",
   area_admin:
-    "A area administrativa e restrita a usuarios administradores e permite cadastrar, editar e remover carros da frota.",
+    "A área administrativa é restrita a usuários autorizados.",
   suporte_humano:
-    "Se precisar de ajuda humana, procure o responsavel pelo sistema ou o suporte informado pela equipe do AgendaCar.",
+    "Para suporte, procure o canal de atendimento informado no sistema.",
   fora_escopo:
-    "Consigo ajudar apenas com assuntos do AgendaCar, como carros, reservas, pagamento, login, cancelamento e suporte.",
+    "Consigo ajudar apenas com carros, reservas, pagamento, login e suporte do AgendaCar.",
   fallback:
-    "Nao consegui entender com seguranca. Voce quer reservar um carro, consultar suas reservas, cancelar uma reserva ou falar sobre pagamento?",
+    "Não entendi com segurança. Pode digitar de outra forma?",
   erro:
-    "Tive um problema ao processar sua mensagem. Pode tentar digitar de novo?"
+    "Tive um problema ao processar sua mensagem. Tente digitar novamente."
 };
 
 const INTENTS_CONFIG: IntentConfig[] = [
@@ -598,7 +598,7 @@ class ChatbotService {
 
   private montarRespostaComCards(intent: ChatbotIntent, cards: ChatbotCard[]) {
     if (intent === "consultar_carros") {
-      return `Encontrei ${cards.length} carro(s) para voce. Confira os cards abaixo.`;
+      return "Encontrei os carros disponíveis. Confira os cards abaixo.";
     }
 
     return RESPOSTAS[intent];
@@ -663,21 +663,21 @@ class ChatbotService {
       alterar_reserva: "alterar uma reserva",
       minhas_reservas: "consultar suas reservas",
       pagamento: "falar sobre pagamento",
-      consultar_carros: "ver carros disponiveis"
+      consultar_carros: "ver carros disponíveis"
     };
 
-    return `Fiquei em duvida se voce quer ${nomes[intents[0]] || intents[0]} ou ${nomes[intents[1]] || intents[1]}. Pode confirmar em uma frase curta?`;
+    return `Fiquei em dúvida se você quer ${nomes[intents[0]] || intents[0]} ou ${nomes[intents[1]] || intents[1]}. Pode confirmar em uma frase curta?`;
   }
 
   private respostaFallbackPorTexto(texto: string, intent: ChatbotIntent) {
     if (intent === "fora_escopo") return RESPOSTAS.fora_escopo;
 
     if (texto === "reserva" || texto === "reservas") {
-      return "Voce quer criar uma nova reserva, consultar suas reservas, alterar ou cancelar uma reserva?";
+      return "Você quer criar, consultar, alterar ou cancelar uma reserva?";
     }
 
     if (texto === "carro" || texto === "carros") {
-      return "Voce quer consultar carros disponiveis, reservar um carro ou receber uma recomendacao?";
+      return "Você quer consultar carros disponíveis, reservar um carro ou receber uma recomendação?";
     }
 
     return RESPOSTAS.fallback;

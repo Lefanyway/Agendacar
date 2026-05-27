@@ -65,25 +65,25 @@ INTENTS_COM_CARDS = {
 TERMOS_GENERICOS = {"reserva", "reservas", "carro", "carros", "pagamento", "ajuda"}
 
 RESPOSTAS = {
-    INTENT_SAUDACAO: "Ola! Posso ajudar com carros, reservas, pagamento, login, cancelamento e suporte. Sobre qual assunto voce quer falar?",
-    INTENT_AGRADECIMENTO: "De nada! Quando quiser consultar carros ou tirar duvida sobre reserva, pode chamar.",
-    INTENT_DESPEDIDA: "Ate mais! Quando quiser consultar ou reservar um carro, estou por aqui.",
-    INTENT_CONSULTAR_CARROS: "Encontrei os carros disponiveis no sistema. Confira os cards abaixo.",
-    INTENT_RESERVAR_CARRO: "Claro. Escolha um carro disponivel nos cards abaixo. Depois informe o periodo da reserva e confirme pelo sistema.",
-    INTENT_CONSULTAR_MODELO: "Use a busca da tela inicial para procurar o modelo. O card mostra diaria, capacidade, transmissao e disponibilidade antes da reserva.",
-    INTENT_FILTROS_CARROS: "Use busca, tipo, disponibilidade e ordenacao na tela inicial para encontrar carros por modelo, categoria, diaria ou capacidade.",
-    INTENT_RECOMENDACAO_CARRO: "Para recomendar melhor, me diga quantidade de passageiros, orcamento por diaria e tipo de uso, como familia, viagem, luxo, esportivo ou economico.",
-    INTENT_MINHAS_RESERVAS: "Voce pode consultar suas reservas acessando Minhas Reservas apos fazer login.",
-    INTENT_CANCELAR_RESERVA: "Entendi que voce quer cancelar uma reserva. Eu nao cancelo automaticamente pelo chat. Acesse Minhas Reservas, escolha a reserva desejada e use a opcao de cancelamento.",
-    INTENT_ALTERAR_RESERVA: "Para alterar uma reserva, acesse Minhas Reservas e selecione a reserva desejada. Se o sistema nao permitir edicao direta, cancele e faca uma nova reserva com os dados corretos.",
-    INTENT_PAGAMENTO: "O pagamento deve ser feito na etapa de finalizacao da reserva. Confira as opcoes disponiveis diretamente na tela de pagamento.",
-    INTENT_LOGIN_CADASTRO: "Use a tela de login para entrar com email e senha. Se ainda nao tiver conta, faca o cadastro antes de reservar.",
-    INTENT_PROBLEMA_LOGIN: "Confira email e senha digitados. Se o problema continuar, procure suporte. Por seguranca, nao envie senha pelo chat.",
-    INTENT_AREA_ADMIN: "A area administrativa e restrita a usuarios com permissao de administrador. O chat nao concede acesso nem altera permissoes.",
-    INTENT_SUPORTE_HUMANO: "Se precisar de ajuda humana, procure o suporte informado pela equipe do AgendaCar.",
-    INTENT_FORA_ESCOPO: "Consigo ajudar apenas com assuntos do AgendaCar, como carros, reservas, pagamento, login, cancelamento e suporte.",
-    INTENT_FALLBACK: "Nao consegui entender com seguranca. Voce quer reservar um carro, consultar suas reservas, cancelar uma reserva ou falar sobre pagamento?",
-    INTENT_ERRO: "Tive um problema ao processar sua mensagem. Pode tentar digitar de novo?",
+    INTENT_SAUDACAO: "Olá! Posso ajudar com carros, reservas, pagamento, login e suporte do AgendaCar.",
+    INTENT_AGRADECIMENTO: "De nada! Quando precisar, posso ajudar com carros e reservas.",
+    INTENT_DESPEDIDA: "Até mais! Quando precisar, estou por aqui.",
+    INTENT_CONSULTAR_CARROS: "Encontrei os carros disponíveis. Confira os cards abaixo.",
+    INTENT_RESERVAR_CARRO: "Escolha um carro disponível nos cards abaixo e informe o período da reserva.",
+    INTENT_CONSULTAR_MODELO: "Use a busca da tela inicial para encontrar o modelo desejado.",
+    INTENT_FILTROS_CARROS: "Use os filtros da tela inicial para encontrar carros por modelo, categoria, diária ou capacidade.",
+    INTENT_RECOMENDACAO_CARRO: "Informe passageiros, orçamento e tipo de uso para receber uma recomendação.",
+    INTENT_MINHAS_RESERVAS: "Você pode consultar suas reservas em Minhas Reservas após fazer login.",
+    INTENT_CANCELAR_RESERVA: "Para cancelar, acesse Minhas Reservas, selecione a reserva e clique em cancelar.",
+    INTENT_ALTERAR_RESERVA: "Para alterar, acesse Minhas Reservas e selecione a reserva desejada.",
+    INTENT_PAGAMENTO: "O pagamento é feito na finalização da reserva. Confira as opções disponíveis na tela de pagamento.",
+    INTENT_LOGIN_CADASTRO: "Para acessar sua conta, use a tela de login ou cadastro.",
+    INTENT_PROBLEMA_LOGIN: "Verifique seu e-mail e senha. Se o erro continuar, tente redefinir o acesso.",
+    INTENT_AREA_ADMIN: "A área administrativa é restrita a usuários autorizados.",
+    INTENT_SUPORTE_HUMANO: "Para suporte, procure o canal de atendimento informado no sistema.",
+    INTENT_FORA_ESCOPO: "Consigo ajudar apenas com carros, reservas, pagamento, login e suporte do AgendaCar.",
+    INTENT_FALLBACK: "Não entendi com segurança. Pode digitar de outra forma?",
+    INTENT_ERRO: "Tive um problema ao processar sua mensagem. Tente digitar novamente.",
 }
 
 PALAVRAS_COMUNS = {
@@ -351,7 +351,7 @@ def montar_resposta(intent, confidence, cards=None, error=False):
     resposta = RESPOSTAS.get(intent, RESPOSTAS[INTENT_FALLBACK])
 
     if intent == INTENT_CONSULTAR_CARROS and show_cards:
-        resposta = f"Encontrei {len(cards)} carro(s) para voce. Confira os cards abaixo."
+        resposta = "Encontrei os carros disponíveis. Confira os cards abaixo."
 
     return {
         "resposta": resposta,

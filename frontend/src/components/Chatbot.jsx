@@ -89,11 +89,11 @@ function normalizarRespostaChatbot(payload) {
   }
 
   return {
-    resposta:
+      resposta:
       payload?.resposta ||
       payload?.text ||
       payload?.message ||
-      'Nao consegui entender sua solicitacao. Pode reformular?',
+      'Não entendi com segurança. Pode digitar de outra forma?',
     intent: payload?.intent || payload?.intencao || 'fallback',
     confidence: Number(payload?.confidence || payload?.confianca || 0),
     showCards: Boolean(payload?.showCards || payload?.mostrarCards || payload?.exibirCards),
@@ -121,7 +121,7 @@ function obterCardsPermitidos(data, textoUsuario) {
 export default function Chatbot() {
   const [aberto, setAberto] = useState(false)
   const [mensagens, setMensagens] = useState([
-    { de: 'bot', texto: 'Ola! Sou o assistente do AgendaCar. Como posso ajudar?' },
+    { de: 'bot', texto: 'Olá! Sou o assistente do AgendaCar. Como posso ajudar?' },
   ])
   const [input, setInput] = useState('')
   const [carregando, setCarregando] = useState(false)
@@ -158,7 +158,7 @@ export default function Chatbot() {
         ...prev,
         {
           de: 'bot',
-          texto: 'Erro de conexao. Tente novamente.',
+          texto: 'Erro de conexão. Tente novamente.',
           cards: [],
         },
       ])
