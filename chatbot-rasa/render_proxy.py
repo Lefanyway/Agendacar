@@ -10,319 +10,302 @@ from urllib.request import Request, urlopen
 PUBLIC_PORT = int(os.environ.get("PORT", "10000"))
 API_BASE_URL = (os.environ.get("AGENDA_API_URL") or os.environ.get("BACKEND_URL") or "").strip()
 API_TIMEOUT_SECONDS = float(os.environ.get("AGENDA_API_TIMEOUT", "2.5"))
+MIN_CONFIDENCE = 0.62
+AMBIGUITY_DELTA = 0.08
 
-ESCOPO = (
-    "carros, reservas, pagamento, login, cancelamento, recomendacoes e area administrativa"
-)
+INTENT_AREA_ADMIN = "area_admin"
+INTENT_CANCELAR_RESERVA = "cancelar_reserva"
+INTENT_ALTERAR_RESERVA = "alterar_reserva"
+INTENT_MINHAS_RESERVAS = "minhas_reservas"
+INTENT_PAGAMENTO = "pagamento"
+INTENT_PROBLEMA_LOGIN = "problema_login"
+INTENT_LOGIN_CADASTRO = "login_cadastro"
+INTENT_SUPORTE_HUMANO = "suporte_humano"
+INTENT_RESERVAR_CARRO = "reservar_carro"
+INTENT_CONSULTAR_CARROS = "consultar_carros"
+INTENT_CONSULTAR_MODELO = "consultar_modelo"
+INTENT_FILTROS_CARROS = "filtros_carros"
+INTENT_RECOMENDACAO_CARRO = "recomendacao_carro"
+INTENT_SAUDACAO = "saudacao"
+INTENT_AGRADECIMENTO = "agradecimento"
+INTENT_DESPEDIDA = "despedida"
+INTENT_FORA_ESCOPO = "fora_escopo"
+INTENT_FALLBACK = "fallback"
+INTENT_ERRO = "erro"
 
-COMMON_TYPOS = {
+INTENT_PRIORITY = {
+    INTENT_AREA_ADMIN: 1,
+    INTENT_CANCELAR_RESERVA: 2,
+    INTENT_ALTERAR_RESERVA: 3,
+    INTENT_MINHAS_RESERVAS: 4,
+    INTENT_PAGAMENTO: 5,
+    INTENT_PROBLEMA_LOGIN: 6,
+    INTENT_LOGIN_CADASTRO: 7,
+    INTENT_SUPORTE_HUMANO: 8,
+    INTENT_RESERVAR_CARRO: 9,
+    INTENT_CONSULTAR_CARROS: 10,
+    INTENT_CONSULTAR_MODELO: 11,
+    INTENT_FILTROS_CARROS: 12,
+    INTENT_RECOMENDACAO_CARRO: 13,
+    INTENT_SAUDACAO: 14,
+    INTENT_AGRADECIMENTO: 15,
+    INTENT_DESPEDIDA: 16,
+    INTENT_FORA_ESCOPO: 17,
+    INTENT_FALLBACK: 18,
+}
+
+INTENTS_COM_CARDS = {
+    INTENT_RESERVAR_CARRO,
+    INTENT_CONSULTAR_CARROS,
+    INTENT_CONSULTAR_MODELO,
+    INTENT_FILTROS_CARROS,
+    INTENT_RECOMENDACAO_CARRO,
+}
+
+TERMOS_GENERICOS = {"reserva", "reservas", "carro", "carros", "pagamento", "ajuda"}
+
+RESPOSTAS = {
+    INTENT_SAUDACAO: "Ola! Posso ajudar com carros, reservas, pagamento, login, cancelamento e suporte. Sobre qual assunto voce quer falar?",
+    INTENT_AGRADECIMENTO: "De nada! Quando quiser consultar carros ou tirar duvida sobre reserva, pode chamar.",
+    INTENT_DESPEDIDA: "Ate mais! Quando quiser consultar ou reservar um carro, estou por aqui.",
+    INTENT_CONSULTAR_CARROS: "Encontrei os carros disponiveis no sistema. Confira os cards abaixo.",
+    INTENT_RESERVAR_CARRO: "Claro. Escolha um carro disponivel nos cards abaixo. Depois informe o periodo da reserva e confirme pelo sistema.",
+    INTENT_CONSULTAR_MODELO: "Use a busca da tela inicial para procurar o modelo. O card mostra diaria, capacidade, transmissao e disponibilidade antes da reserva.",
+    INTENT_FILTROS_CARROS: "Use busca, tipo, disponibilidade e ordenacao na tela inicial para encontrar carros por modelo, categoria, diaria ou capacidade.",
+    INTENT_RECOMENDACAO_CARRO: "Para recomendar melhor, me diga quantidade de passageiros, orcamento por diaria e tipo de uso, como familia, viagem, luxo, esportivo ou economico.",
+    INTENT_MINHAS_RESERVAS: "Voce pode consultar suas reservas acessando Minhas Reservas apos fazer login.",
+    INTENT_CANCELAR_RESERVA: "Entendi que voce quer cancelar uma reserva. Eu nao cancelo automaticamente pelo chat. Acesse Minhas Reservas, escolha a reserva desejada e use a opcao de cancelamento.",
+    INTENT_ALTERAR_RESERVA: "Para alterar uma reserva, acesse Minhas Reservas e selecione a reserva desejada. Se o sistema nao permitir edicao direta, cancele e faca uma nova reserva com os dados corretos.",
+    INTENT_PAGAMENTO: "O pagamento deve ser feito na etapa de finalizacao da reserva. Confira as opcoes disponiveis diretamente na tela de pagamento.",
+    INTENT_LOGIN_CADASTRO: "Use a tela de login para entrar com email e senha. Se ainda nao tiver conta, faca o cadastro antes de reservar.",
+    INTENT_PROBLEMA_LOGIN: "Confira email e senha digitados. Se o problema continuar, procure suporte. Por seguranca, nao envie senha pelo chat.",
+    INTENT_AREA_ADMIN: "A area administrativa e restrita a usuarios com permissao de administrador. O chat nao concede acesso nem altera permissoes.",
+    INTENT_SUPORTE_HUMANO: "Se precisar de ajuda humana, procure o suporte informado pela equipe do AgendaCar.",
+    INTENT_FORA_ESCOPO: "Consigo ajudar apenas com assuntos do AgendaCar, como carros, reservas, pagamento, login, cancelamento e suporte.",
+    INTENT_FALLBACK: "Nao consegui entender com seguranca. Voce quer reservar um carro, consultar suas reservas, cancelar uma reserva ou falar sobre pagamento?",
+    INTENT_ERRO: "Tive um problema ao processar sua mensagem. Pode tentar digitar de novo?",
+}
+
+PALAVRAS_COMUNS = {
     "resarvar": "reservar",
     "resrvar": "reservar",
-    "reservaçao": "reserva",
-    "reservacao": "reserva",
+    "qro": "quero",
+    "q": "que",
+    "vc": "voce",
+    "vcs": "voces",
     "veiculo": "carro",
     "veiculos": "carros",
-    "disponivel": "disponivel",
-    "disponiveis": "disponiveis",
+    "locacao": "reserva",
+    "locacoes": "reservas",
     "pagamnto": "pagamento",
     "pagmanto": "pagamento",
-    "cartao": "cartao",
-    "cadastroo": "cadastro",
     "loguin": "login",
     "adimin": "admin",
     "admim": "admin",
 }
 
-INTENTS = {
-    "reservar": {
-        "keywords": {
-            "como reservar": 4, "quero reservar": 4, "fazer reserva": 4,
-            "reservar": 3, "reserva": 2, "alugar": 3, "locar": 3,
-            "agendar": 3, "retirada": 2, "devolucao": 2,
+INTENT_RULES = {
+    INTENT_CANCELAR_RESERVA: {
+        "phrases": {
+            "cancelar minha reserva": 10,
+            "cancelar reserva": 9,
+            "como cancelo uma reserva": 9,
+            "como cancelar uma reserva": 9,
+            "desmarcar reserva": 8,
+            "remover reserva": 8,
+            "desistir da reserva": 8,
         },
-        "response": (
-            "Para reservar, abra um card de carro, confira diaria, capacidade e disponibilidade, "
-            "clique no veiculo desejado e informe o periodo. Depois revise os dados e avance para o pagamento."
-        ),
+        "words": {"cancelar": 4, "cancelo": 4, "desmarcar": 4, "remover": 3, "desistir": 3, "reserva": 2, "reservas": 2},
+        "requires_any": [{"cancelar", "cancelo", "desmarcar", "remover", "desistir"}],
     },
-    "cancelar": {
-        "keywords": {
-            "cancelar minha reserva": 5, "cancelar reserva": 4, "cancelamento": 3, "cancelar": 4,
-            "desmarcar": 3, "desistir": 2, "remover reserva": 4,
+    INTENT_ALTERAR_RESERVA: {
+        "phrases": {
+            "alterar minha reserva": 10,
+            "alterar reserva": 9,
+            "mudar a data da reserva": 10,
+            "mudar data da reserva": 9,
+            "trocar data da reserva": 9,
+            "remarcar reserva": 9,
+            "editar reserva": 8,
         },
-        "response": (
-            "Para cancelar, acesse Minhas Reservas e escolha a reserva que deseja cancelar. "
-            "O sistema permite cancelar apenas reservas da conta logada."
-        ),
+        "words": {"alterar": 4, "mudar": 4, "trocar": 4, "remarcar": 4, "editar": 4, "modificar": 4, "data": 2, "reserva": 2},
+        "requires_any": [{"alterar", "mudar", "trocar", "remarcar", "editar", "modificar"}],
     },
-    "alterar": {
-        "keywords": {
-            "alterar reserva": 4, "mudar data": 4, "trocar data": 4,
-            "editar reserva": 4, "modificar reserva": 4, "data errada": 3,
-            "trocar carro": 3,
+    INTENT_MINHAS_RESERVAS: {
+        "phrases": {
+            "onde vejo minhas reservas": 10,
+            "minhas reservas": 9,
+            "ver minhas reservas": 9,
+            "consultar minhas reservas": 9,
+            "quero ver minha reserva": 9,
+            "onde esta minha reserva": 9,
+            "historico de reservas": 8,
+            "reservas feitas": 8,
+            "minhas locacoes": 8,
+            "meus agendamentos": 8,
         },
-        "response": (
-            "No momento, a forma segura de alterar e cancelar a reserva atual e criar uma nova "
-            "com o carro, datas e destino corretos."
-        ),
+        "words": {"minhas": 4, "meus": 3, "ver": 3, "vejo": 3, "consultar": 3, "historico": 4, "reservas": 3, "reserva": 2, "agendamentos": 4},
+        "requires_any": [{"minhas", "meus", "vejo", "ver", "consultar", "historico", "agendamentos"}],
     },
-    "minhas_reservas": {
-        "keywords": {
-            "minhas reservas": 5, "meus agendamentos": 4, "ver reserva": 3,
-            "reserva ativa": 3, "historico": 2, "acompanhar reserva": 4,
-            "status da reserva": 4,
-        },
-        "response": (
-            "Suas reservas ficam em Minhas Reservas. La voce acompanha carro, periodo, valor "
-            "e status da reserva feita pela sua conta."
-        ),
+    INTENT_PAGAMENTO: {
+        "phrases": {"quero pagar minha reserva": 10, "confirmar pagamento": 8, "confirma meu pagamento": 8, "pagamento da reserva": 8, "forma de pagamento": 7},
+        "words": {"pagar": 4, "pagamento": 4, "pix": 4, "cartao": 4, "boleto": 4, "comprovante": 4, "confirmar": 3, "confirma": 3},
     },
-    "pagamento": {
-        "keywords": {
-            "pagamento": 3, "pagar": 3, "cartao": 3, "pix": 2, "valor total": 4,
-            "diaria": 3, "preco": 3, "parcelar": 3, "cobranca": 3,
-        },
-        "response": (
-            "O pagamento vem depois da escolha do carro e do periodo. Antes de finalizar, confira "
-            "veiculo, datas, destino e valor total da reserva."
-        ),
+    INTENT_PROBLEMA_LOGIN: {
+        "phrases": {"esqueci minha senha": 10, "nao consigo entrar": 9, "login nao funciona": 9, "erro no login": 8, "senha errada": 8},
+        "words": {"esqueci": 4, "senha": 4, "erro": 3, "login": 3, "entrar": 2, "bloqueado": 3},
     },
-    "login": {
-        "keywords": {
-            "login": 3, "entrar": 2, "logar": 3, "criar conta": 4,
-            "cadastro": 3, "cadastrar": 3, "senha": 2, "minha conta": 4,
-        },
-        "response": (
-            "Use a tela de login para entrar com email e senha. Se ainda nao tiver conta, faca o cadastro. "
-            "Reservas e pagamentos exigem usuario autenticado."
-        ),
+    INTENT_LOGIN_CADASTRO: {
+        "phrases": {"criar conta": 8, "fazer cadastro": 8, "como faco login": 8, "entrar na conta": 7},
+        "words": {"login": 3, "cadastro": 3, "cadastrar": 3, "conta": 2, "entrar": 2, "logar": 3},
     },
-    "problema_login": {
-        "keywords": {
-            "nao consigo entrar": 5, "erro no login": 5, "senha errada": 4,
-            "esqueci senha": 4, "email invalido": 4, "login nao funciona": 5,
-            "problema no cadastro": 4,
-        },
-        "response": (
-            "Confira email e senha digitados. Se o problema continuar, tente cadastrar novamente ou procure suporte. "
-            "Por seguranca, nao envie senha pelo chat."
-        ),
+    INTENT_AREA_ADMIN: {
+        "phrases": {"sou admin": 9, "area admin": 8, "area administrativa": 8, "cadastrar carro": 8, "painel administrativo": 8},
+        "words": {"admin": 4, "administrador": 4, "administrativa": 4, "painel": 3, "cadastrar": 3, "editar": 3, "remover": 3},
     },
-    "admin": {
-        "keywords": {
-            "admin": 3, "administrador": 3, "painel": 2, "area administrativa": 4,
-            "cadastrar carro": 4, "editar carro": 4, "remover carro": 4,
-            "gerenciar frota": 4,
-        },
-        "response": (
-            "A area administrativa permite cadastrar, editar e remover carros. "
-            "Ela e restrita a usuarios com perfil de administrador."
-        ),
+    INTENT_SUPORTE_HUMANO: {
+        "phrases": {"suporte humano": 8, "falar com atendente": 8, "falar com alguem": 7},
+        "words": {"suporte": 4, "atendente": 4, "humano": 4, "alguem": 3, "ajuda": 1},
     },
-    "suporte": {
-        "keywords": {
-            "suporte humano": 5, "falar com atendente": 5, "falar com alguem": 4,
-            "atendimento": 3, "responsavel": 3, "suporte": 3,
-        },
-        "response": (
-            "Se precisar de ajuda humana, procure o responsavel pelo sistema ou o suporte informado pela equipe do AgendaCar."
-        ),
+    INTENT_RESERVAR_CARRO: {
+        "phrases": {"quero reservar um carro": 10, "quero alugar um carro": 10, "reservar carro": 8, "alugar carro": 8, "locar carro": 8, "fazer uma reserva": 6},
+        "words": {"reservar": 4, "alugar": 4, "locar": 4, "agendar": 3, "carro": 3, "veiculo": 3},
+        "requires_any": [{"reservar", "alugar", "locar", "agendar"}],
     },
-    "recomendacao": {
-        "keywords": {
-            "recomenda": 4, "recomendacao": 4, "indica": 4, "sugerir": 4,
-            "qual escolher": 4, "melhor carro": 4, "familia": 2, "viagem": 2,
-            "luxo": 2, "esportivo": 2, "economico": 2, "barato": 2,
-            "pessoas": 2, "passageiros": 2, "lugares": 2, "orcamento": 2,
-            "ate": 1,
-        },
+    INTENT_CONSULTAR_CARROS: {
+        "phrases": {"me mostra todos os carros": 10, "mostrar carros": 9, "mostre os carros": 9, "me mostra os carros": 9, "quais carros voces tem": 9, "ver carros": 8, "listar carros": 8, "lista de carros": 8, "carros disponiveis": 8, "modelos disponiveis": 8, "todos os carros": 8, "quero ver os carros": 8},
+        "words": {"mostrar": 4, "mostra": 4, "mostre": 4, "listar": 4, "liste": 4, "quais": 3, "todos": 3, "carros": 3, "modelos": 3, "disponiveis": 3, "automatico": 2},
+        "requires_any": [{"mostrar", "mostra", "mostre", "listar", "liste", "quais", "todos", "disponiveis", "modelos", "automatico"}],
     },
-    "carros": {
-        "keywords": {
-            "carros": 3, "carro": 2, "modelos": 3, "disponiveis": 3,
-            "disponivel": 3, "frota": 3, "suv": 2, "sedan": 2, "picape": 2,
-            "esportivo": 2, "automatico": 2, "manual": 2,
-        },
+    INTENT_FILTROS_CARROS: {
+        "phrases": {"filtrar carros": 8, "ordenar por menor preco": 8, "buscar por modelo": 7},
+        "words": {"filtro": 4, "filtrar": 4, "ordenar": 4, "buscar": 3, "preco": 2, "capacidade": 2},
     },
-    "filtros": {
-        "keywords": {
-            "filtro": 4, "filtrar": 4, "ordenar": 4, "buscar": 3, "pesquisar": 3,
-            "menor preco": 4, "maior preco": 4, "por tipo": 3, "capacidade": 3,
-        },
-        "response": (
-            "Na tela inicial, use busca, tipo, disponibilidade e ordenacao. "
-            "Assim voce encontra carros por modelo, categoria, diaria ou capacidade."
-        ),
+    INTENT_RECOMENDACAO_CARRO: {
+        "phrases": {"me recomenda um carro": 9, "qual carro voce recomenda": 9, "melhor carro para viagem": 8, "carro para familia": 7},
+        "words": {"recomenda": 4, "recomendacao": 4, "indica": 4, "sugere": 4, "familia": 2, "viagem": 2, "luxo": 2, "esportivo": 2, "economico": 2, "passageiros": 2},
     },
-    "saudacao": {
-        "keywords": {
-            "oi": 2, "ola": 2, "bom dia": 3, "boa tarde": 3, "boa noite": 3,
-            "ajuda": 2, "menu": 2,
-        },
-        "response": (
-            "Oi! Posso ajudar com carros, reservas, pagamento, login, cancelamento, recomendacoes e area admin. "
-            "Sobre qual assunto voce quer falar?"
-        ),
-    },
-    "agradecimento": {
-        "keywords": {"obrigado": 3, "obrigada": 3, "valeu": 3, "vlw": 3, "show": 2},
-        "response": "De nada! Quando quiser consultar carros ou tirar duvida sobre reserva, pode chamar.",
-    },
-    "despedida": {
-        "keywords": {"tchau": 3, "ate": 2, "falou": 2, "sair": 2, "encerrar": 3},
-        "response": "Ate mais! Quando quiser consultar ou reservar um carro, estou por aqui.",
-    },
+    INTENT_SAUDACAO: {"phrases": {"bom dia": 5, "boa tarde": 5, "boa noite": 5}, "words": {"oi": 4, "ola": 4, "opa": 3, "salve": 3}},
+    INTENT_AGRADECIMENTO: {"phrases": {}, "words": {"obrigado": 4, "obrigada": 4, "valeu": 4, "vlw": 3}},
+    INTENT_DESPEDIDA: {"phrases": {"ate mais": 5, "ate logo": 5}, "words": {"tchau": 4, "falou": 3, "sair": 3, "encerrar": 3}},
 }
 
-OFF_SCOPE_TERMS = {
-    "piada", "poesia", "musica", "receita", "futebol", "dolar", "clima",
-    "tempo", "filme", "noticia", "jogo", "politica", "cagar", "merda",
-    "bosta", "porra", "caralho", "fodase",
-}
-
-CAR_TYPES = {
-    "suv": ["suv", "familia", "viagem", "espacoso"],
-    "sedan": ["sedan", "executivo", "confortavel"],
-    "sport": ["sport", "esportivo", "performance", "rapido", "luxo"],
-    "picape": ["picape", "pickup", "caminhonete", "carga"],
-}
+OFF_SCOPE_TERMS = {"capital", "franca", "piada", "poesia", "receita", "futebol", "dolar", "clima", "filme", "noticia", "politica"}
 
 
 def normalizar_texto(texto):
     texto = str(texto or "").strip().lower()
     texto = unicodedata.normalize("NFD", texto)
     texto = "".join(char for char in texto if unicodedata.category(char) != "Mn")
-    texto = texto.replace("ç", "c")
     texto = re.sub(r"https?://\S+|www\.\S+", " link ", texto)
     texto = re.sub(r"[^a-z0-9@\s]", " ", texto)
     texto = re.sub(r"\s+", " ", texto).strip()
-
-    palavras = [COMMON_TYPOS.get(palavra, palavra) for palavra in texto.split()]
-    return " ".join(palavras)
+    return " ".join(PALAVRAS_COMUNS.get(palavra, palavra) for palavra in texto.split())
 
 
-def extrair_mensagem(body):
+def contem_termo(texto, termo):
+    termo = normalizar_texto(termo)
+    if not termo:
+        return False
+    if " " in termo:
+        return termo in texto
+    return re.search(rf"\b{re.escape(termo)}\b", texto) is not None
+
+
+def calcular_pontuacao(texto, config):
+    score = 0
+    hits = 0
+
+    for frase, peso in config.get("phrases", {}).items():
+        if contem_termo(texto, frase):
+            score += peso
+            hits += 1
+
+    for palavra, peso in config.get("words", {}).items():
+        if contem_termo(texto, palavra):
+            score += peso
+            hits += 1
+
+    required_groups = config.get("requires_any") or []
+    if required_groups and not any(any(contem_termo(texto, item) for item in group) for group in required_groups):
+        return 0, 0
+
+    return score, hits
+
+
+def calcular_confianca(score, hits):
+    if score <= 0:
+        return 0.0
+    base = min(0.95, score / 15)
+    bonus = min(0.12, hits * 0.025)
+    return round(min(0.96, base + bonus), 2)
+
+
+def resolver_ambiguidade(candidatos):
+    if len(candidatos) < 2:
+        return None
+
+    primeiro = candidatos[0]
+    segundo = candidatos[1]
+    if primeiro["confidence"] < MIN_CONFIDENCE:
+        return INTENT_FALLBACK
+    if primeiro["confidence"] - segundo["confidence"] <= AMBIGUITY_DELTA:
+        return INTENT_FALLBACK
+    return None
+
+
+def detectar_intencao(texto):
+    if not texto or re.fullmatch(r"[\W_]*", texto):
+        return INTENT_FALLBACK, 0.0
+
+    if texto in TERMOS_GENERICOS:
+        return INTENT_FALLBACK, 0.42
+
+    if any(contem_termo(texto, termo) for termo in OFF_SCOPE_TERMS):
+        return INTENT_FORA_ESCOPO, 0.9
+
+    candidatos = []
+    for intent, config in INTENT_RULES.items():
+        score, hits = calcular_pontuacao(texto, config)
+        confidence = calcular_confianca(score, hits)
+        if score > 0:
+            candidatos.append({
+                "intent": intent,
+                "score": score,
+                "hits": hits,
+                "confidence": confidence,
+                "priority": INTENT_PRIORITY.get(intent, 99),
+            })
+
+    if not candidatos:
+        return INTENT_FALLBACK, 0.0
+
+    candidatos.sort(key=lambda item: (-item["confidence"], -item["score"], item["priority"]))
+    ambigua = resolver_ambiguidade(candidatos)
+    if ambigua:
+        return ambigua, candidatos[0]["confidence"]
+
+    escolhido = candidatos[0]
+    if escolhido["confidence"] < MIN_CONFIDENCE:
+        return INTENT_FALLBACK, escolhido["confidence"]
+
+    return escolhido["intent"], escolhido["confidence"]
+
+
+def extrair_payload(body):
     try:
         payload = json.loads(body.decode("utf-8") or "{}")
-        sender = payload.get("sender") or "usuario"
-        message = payload.get("message") or payload.get("mensagem") or ""
-        return sender, normalizar_texto(message)
     except Exception:
         return "usuario", ""
 
-
-def contem_termo(mensagem, termo):
-    termo = normalizar_texto(termo)
-
-    if not termo:
-        return False
-
-    if " " in termo:
-        return termo in mensagem
-
-    return re.search(rf"\b{re.escape(termo)}\b", mensagem) is not None
+    sender = payload.get("sender") or payload.get("recipient_id") or "usuario"
+    message = payload.get("message") or payload.get("mensagem") or ""
+    return sender, normalizar_texto(message)
 
 
-def pontuar_intencoes(mensagem):
-    scores = {}
-
-    for intent, config in INTENTS.items():
-        score = 0
-        hits = 0
-
-        for termo, peso in config["keywords"].items():
-            if contem_termo(mensagem, termo):
-                score += peso
-                hits += 1
-
-        if hits:
-            scores[intent] = {"score": score, "hits": hits}
-
-    return scores
-
-
-def detectar_intencao(mensagem):
-    if contem_termo(mensagem, "reservar") and contem_termo(mensagem, "cancelar"):
-        return "ambigua:reservar:cancelar", {}
-
-    scores = pontuar_intencoes(mensagem)
-
-    if not scores:
-        return None, scores
-
-    ordenados = sorted(scores.items(), key=lambda item: item[1]["score"], reverse=True)
-    melhor_intent, melhor = ordenados[0]
-
-    intents_curtas = {"saudacao", "despedida", "agradecimento"}
-
-    if melhor["score"] < 3 and melhor_intent not in intents_curtas:
-        return None, scores
-
-    if melhor["score"] == 3 and melhor["hits"] == 1 and len(mensagem.split()) > 3:
-        return None, scores
-
-    if len(ordenados) > 1:
-        segundo_intent, segundo = ordenados[1]
-        if segundo["score"] >= 3 and melhor["score"] - segundo["score"] <= 1:
-            return f"ambigua:{melhor_intent}:{segundo_intent}", scores
-
-    return melhor_intent, scores
-
-
-def resposta_ambigua(intent_a, intent_b):
-    nomes = {
-        "reservar": "fazer uma reserva",
-        "cancelar": "cancelar uma reserva",
-        "alterar": "alterar uma reserva",
-        "pagamento": "pagamento ou diaria",
-        "login": "login ou cadastro",
-        "carros": "consultar carros",
-        "recomendacao": "receber uma recomendacao",
-        "admin": "area administrativa",
-    }
-
-    return (
-        f"Fiquei em duvida se voce quer {nomes.get(intent_a, intent_a)} ou "
-        f"{nomes.get(intent_b, intent_b)}. Pode confirmar em uma frase curta?"
-    )
-
-
-def resposta_fallback(mensagem):
-    if not mensagem:
-        return (
-            "Nao recebi nenhuma mensagem. Pergunte, por exemplo: 'como reservar?', "
-            "'quais carros estao disponiveis?' ou 'como cancelar uma reserva?'."
-        )
-
-    if len(mensagem) <= 2:
-        return (
-            "Sua mensagem ficou muito curta. Pode reformular dizendo se precisa de ajuda com "
-            f"{ESCOPO}?"
-        )
-
-    if re.fullmatch(r"[\d\s]+", mensagem):
-        return (
-            "Recebi apenas numeros. Se for sobre diaria, preco ou reserva, escreva tambem o que deseja consultar."
-        )
-
-    if "@" in mensagem:
-        return (
-            "Parece que voce digitou um email. Use a tela de login ou cadastro do AgendaCar. "
-            "Por seguranca, nao envie senha pelo chat."
-        )
-
-    if any(contem_termo(mensagem, termo) for termo in OFF_SCOPE_TERMS):
-        return f"Essa pergunta foge do AgendaCar. Posso ajudar apenas com {ESCOPO}."
-
-    return (
-        "Nao tenho certeza do que voce quis dizer. Pode reformular? "
-        f"Eu ajudo com {ESCOPO}."
-    )
-
-
-def buscar_carros_api():
+def buscar_cards_carros():
     if not API_BASE_URL:
-        return None
+        return []
 
     url = urljoin(API_BASE_URL.rstrip("/") + "/", "carros")
     request = Request(url, headers={"Accept": "application/json"})
@@ -330,180 +313,65 @@ def buscar_carros_api():
     try:
         with urlopen(request, timeout=API_TIMEOUT_SECONDS) as response:
             if response.status >= 400:
-                return None
-
+                return []
             payload = json.loads(response.read().decode("utf-8"))
-            return payload if isinstance(payload, list) else None
     except Exception:
-        return None
+        return []
+
+    carros = payload if isinstance(payload, list) else payload.get("data", []) if isinstance(payload, dict) else []
+    cards = []
+    for carro in carros:
+        if not isinstance(carro, dict):
+            continue
+        cards.append({
+            "id": carro.get("id"),
+            "nome": carro.get("nome") or carro.get("modelo") or "Carro",
+            "tipo": carro.get("tipo") or carro.get("categoria") or "",
+            "imagem": carro.get("imagem"),
+            "capacidade": carro.get("capacidade"),
+            "transmissao": carro.get("transmissao"),
+            "tanque": carro.get("tanque"),
+            "precoDia": carro.get("precoDia") or carro.get("preco_diaria") or carro.get("diaria"),
+            "disponivel": bool(carro.get("disponivel", True)),
+        })
+    return cards
 
 
-def formatar_moeda(valor):
-    try:
-        numero = float(valor)
-    except (TypeError, ValueError):
-        return "valor nao informado"
-
-    return f"R$ {numero:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+def resposta_fallback(confidence=0.0):
+    return montar_resposta(INTENT_FALLBACK, confidence, [])
 
 
-def extrair_preco_maximo(mensagem):
-    padroes = [
-        r"ate\s*r?\$?\s*(\d{2,6})",
-        r"maximo\s*r?\$?\s*(\d{2,6})",
-        r"orcamento\s*r?\$?\s*(\d{2,6})",
-        r"r\$\s*(\d{2,6})",
-        r"(\d{2,6})\s*reais",
-    ]
-
-    for padrao in padroes:
-        match = re.search(padrao, mensagem)
-        if match:
-            return int(match.group(1))
-
-    return None
+def resposta_erro():
+    return montar_resposta(INTENT_ERRO, 0.0, [], error=True)
 
 
-def extrair_passageiros(mensagem):
-    match = re.search(r"(\d+)\s*(pessoas|passageiros|lugares)", mensagem)
-    if match:
-        return int(match.group(1))
+def montar_resposta(intent, confidence, cards=None, error=False):
+    cards = cards or []
+    show_cards = intent in INTENTS_COM_CARDS and len(cards) > 0
+    resposta = RESPOSTAS.get(intent, RESPOSTAS[INTENT_FALLBACK])
 
-    if contem_termo(mensagem, "familia"):
-        return 5
+    if intent == INTENT_CONSULTAR_CARROS and show_cards:
+        resposta = f"Encontrei {len(cards)} carro(s) para voce. Confira os cards abaixo."
 
-    return None
-
-
-def extrair_tipo(mensagem):
-    for tipo, termos in CAR_TYPES.items():
-        if any(contem_termo(mensagem, termo) for termo in termos):
-            return tipo
-
-    return None
-
-
-def filtrar_carros(carros, mensagem):
-    passageiros = extrair_passageiros(mensagem)
-    preco_maximo = extrair_preco_maximo(mensagem)
-    tipo = extrair_tipo(mensagem)
-    disponiveis = contem_termo(mensagem, "disponivel") or contem_termo(mensagem, "reservar")
-
-    filtrados = list(carros)
-
-    if passageiros:
-        filtrados = [c for c in filtrados if int(c.get("capacidade") or 0) >= passageiros]
-
-    if preco_maximo:
-        filtrados = [c for c in filtrados if float(c.get("precoDia") or 0) <= preco_maximo]
-
-    if tipo:
-        filtrados = [
-            c for c in filtrados
-            if tipo in normalizar_texto(c.get("tipo", "")) or any(
-                termo in normalizar_texto(c.get("nome", "")) for termo in CAR_TYPES[tipo]
-            )
-        ]
-
-    if disponiveis:
-        filtrados = [c for c in filtrados if bool(c.get("disponivel"))]
-
-    return sorted(filtrados, key=lambda c: float(c.get("precoDia") or 0))
+    return {
+        "resposta": resposta,
+        "intent": intent,
+        "confidence": round(float(confidence or 0.0), 2),
+        "showCards": show_cards,
+        "cards": cards if show_cards else [],
+        "error": bool(error),
+    }
 
 
-def responder_carros(mensagem, recomendacao=False):
-    carros = buscar_carros_api()
-    passageiros = extrair_passageiros(mensagem)
-    preco_maximo = extrair_preco_maximo(mensagem)
-    tipo = extrair_tipo(mensagem)
-
-    if recomendacao and not any([passageiros, preco_maximo, tipo]):
-        return (
-            "Para recomendar melhor, me diga pelo menos um criterio: quantidade de passageiros, "
-            "orcamento por diaria ou tipo de uso, como familia, viagem, luxo, esportivo ou economico."
-        )
-
-    if carros is None:
-        if recomendacao:
-            criterios = []
-            if passageiros:
-                criterios.append(f"{passageiros} passageiros")
-            if preco_maximo:
-                criterios.append(f"diaria ate {formatar_moeda(preco_maximo)}")
-            if tipo:
-                criterios.append(f"perfil {tipo}")
-
-            if criterios:
-                return (
-                    "Nao estou consultando a frota em tempo real agora, entao nao posso garantir disponibilidade. "
-                    f"Pelos criterios informados ({', '.join(criterios)}), procure na tela inicial por carros que combinem "
-                    "com esse perfil e confira o card antes de reservar."
-                )
-
-            return (
-                "Consigo orientar a escolha, mas nao estou consultando a frota em tempo real agora. "
-                "Informe passageiros, orcamento e tipo de uso para eu sugerir o perfil ideal."
-            )
-
-        return (
-            "Consulte os cards na tela inicial. Cada card mostra modelo, diaria, capacidade, transmissao "
-            "e disponibilidade. Para reservar, clique no carro desejado e informe o periodo."
-        )
-
-    filtrados = filtrar_carros(carros, mensagem)
-
-    if not filtrados:
-        return (
-            "Nao encontrei carro na frota atual com esses criterios. Tente aumentar o orcamento, "
-            "mudar o tipo de carro ou consultar todos os modelos na tela inicial."
-        )
-
-    selecionados = filtrados[:3]
-    linhas = []
-
-    for carro in selecionados:
-        status = "disponivel" if carro.get("disponivel") else "indisponivel"
-        linhas.append(
-            f"{carro.get('nome')} ({carro.get('tipo')}) - {formatar_moeda(carro.get('precoDia'))}/dia, "
-            f"{carro.get('capacidade')} lugares, {status}"
-        )
-
-    prefixo = "Com base nos criterios, encontrei:" if recomendacao else "Encontrei na frota:"
-    return (
-        prefixo + "\n- " + "\n- ".join(linhas) +
-        "\nAbra o card do carro para conferir detalhes antes de reservar."
-    )
+def processar_chat(body):
+    _sender, texto = extrair_payload(body)
+    intent, confidence = detectar_intencao(texto)
+    cards = buscar_cards_carros() if intent in INTENTS_COM_CARDS else []
+    return montar_resposta(intent, confidence, cards)
 
 
-def gerar_texto_resposta(mensagem):
-    intent, _scores = detectar_intencao(mensagem)
-
-    if intent and intent.startswith("ambigua:"):
-        _, intent_a, intent_b = intent.split(":")
-        return resposta_ambigua(intent_a, intent_b)
-
-    if intent == "recomendacao":
-        return responder_carros(mensagem, recomendacao=True)
-
-    if intent == "carros":
-        return responder_carros(mensagem, recomendacao=False)
-
-    if intent:
-        return INTENTS[intent]["response"]
-
-    return resposta_fallback(mensagem)
-
-
-def gerar_resposta(body):
-    sender, mensagem = extrair_mensagem(body)
-    texto = gerar_texto_resposta(mensagem)
-
-    return [
-        {
-            "recipient_id": sender,
-            "text": texto
-        }
-    ]
+def adaptar_para_rasa(sender, resposta):
+    return [{"recipient_id": sender, "text": resposta.get("resposta", "")}]
 
 
 class ChatbotHandler(BaseHTTPRequestHandler):
@@ -519,46 +387,41 @@ class ChatbotHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(response)
 
+    def do_OPTIONS(self):
+        self._send_json(204, {})
+
     def do_HEAD(self):
         self.send_response(200)
-        self.send_header("Content-Type", "application/json")
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.end_headers()
-
-    def do_OPTIONS(self):
-        self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, HEAD")
         self.end_headers()
 
     def do_GET(self):
-        if self.path in ["/", "/health"]:
-            self._send_json(200, {
-                "status": "ok",
-                "message": "AgendaCar chatbot funcionando",
-                "modo": "proxy"
-            })
+        if self.path.startswith("/health"):
+            self._send_json(200, {"status": "ok", "service": "agendacar-chatbot-proxy"})
             return
 
-        self._send_json(404, {
-            "erro": "Rota nao encontrada."
-        })
+        self._send_json(200, {"status": "ok", "message": "AgendaCar chatbot proxy ativo"})
 
     def do_POST(self):
-        content_length = int(self.headers.get("Content-Length", "0"))
-        body = self.rfile.read(content_length)
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+            body = self.rfile.read(length) if length else b"{}"
+            sender, _texto = extrair_payload(body)
+            resposta = processar_chat(body)
 
-        self._send_json(200, gerar_resposta(body))
+            if self.path.startswith("/webhooks/rest/webhook"):
+                self._send_json(200, adaptar_para_rasa(sender, resposta))
+                return
+
+            self._send_json(200, resposta)
+        except Exception:
+            self._send_json(500, resposta_erro())
 
     def log_message(self, format, *args):
-        print(f"[chatbot] {self.address_string()} - {format % args}", flush=True)
+        return
 
 
 if __name__ == "__main__":
     server = ThreadingHTTPServer(("0.0.0.0", PUBLIC_PORT), ChatbotHandler)
-
-    print(f"Chatbot HTTP aberto em 0.0.0.0:{PUBLIC_PORT}", flush=True)
-    print("Servico pronto para receber mensagens.", flush=True)
-
+    print(f"AgendaCar chatbot proxy listening on port {PUBLIC_PORT}", flush=True)
     server.serve_forever()

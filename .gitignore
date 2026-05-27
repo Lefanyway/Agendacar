@@ -17,3 +17,4 @@ frontend/.env
 backend/.env
 chatbot-rasa/.venv/
 chatbot-rasa/models/
+chatbot-rasa/__pycache__/

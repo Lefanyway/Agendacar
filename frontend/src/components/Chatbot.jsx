@@ -5,26 +5,26 @@ import { Link } from 'react-router-dom'
 import api from '../services/api'
 
 const INTENTS_COM_CARDS = new Set([
-  'reservar_carro',
   'consultar_carros',
+  'reservar_carro',
   'consultar_modelo',
   'filtros_carros',
   'recomendacao_carro',
-  'recomendar_carro',
 ])
 
 const INTENTS_SEM_CARDS = new Set([
-  'cancelar_reserva',
-  'alterar_reserva',
   'minhas_reservas',
   'consultar_reserva',
+  'cancelar_reserva',
+  'alterar_reserva',
   'pagamento',
   'login_cadastro',
   'problema_login',
   'area_admin',
-  'fora_escopo',
   'suporte_humano',
+  'fora_escopo',
   'fallback',
+  'erro',
 ])
 
 function normalizarTexto(texto = '') {
@@ -41,30 +41,15 @@ function pareceFluxoSemCards(textoUsuario, intent) {
   const texto = normalizarTexto(textoUsuario)
   const intentNormalizada = normalizarTexto(intent)
 
-  if (INTENTS_SEM_CARDS.has(intentNormalizada)) {
-    return true
-  }
+  if (INTENTS_SEM_CARDS.has(intentNormalizada)) return true
 
-  const falaDeReserva =
-    /\b(reserva|reservas|agendamento|agendamentos)\b/.test(texto)
-
-  const falaDeCancelamento =
-    /\b(cancelar|cancela|cancelo|cancelamento|desmarcar|desmarca|desfazer|remover|apagar|deletar|desistir)\b/.test(texto)
-
-  const falaDeAlteracao =
-    /\b(alterar|altera|alteracao|mudar|trocar|editar|remarcar|reagendar)\b/.test(texto)
-
-  const falaDeMinhasReservas =
-    /\b(minha reserva|minhas reservas|ver reserva|ver minhas reservas|consultar reserva|historico de reservas)\b/.test(texto)
-
-  const falaDePagamento =
-    /\b(pagar|pagamento|pix|cartao|boleto|paguei|confirmar pagamento|comprovante)\b/.test(texto)
-
-  const falaDeLogin =
-    /\b(login|entrar|senha|cadastro|cadastrar|conta|acesso)\b/.test(texto)
-
-  const falaDeAdmin =
-    /\b(admin|administrador|painel admin|area admin|cadastrar carro|editar carro|remover carro)\b/.test(texto)
+  const falaDeReserva = /\b(reserva|reservas|agendamento|agendamentos)\b/.test(texto)
+  const falaDeCancelamento = /\b(cancelar|cancela|cancelo|cancelamento|desmarcar|desmarca|desfazer|remover|apagar|deletar|desistir)\b/.test(texto)
+  const falaDeAlteracao = /\b(alterar|altera|alteracao|mudar|trocar|editar|remarcar|reagendar)\b/.test(texto)
+  const falaDeMinhasReservas = /\b(minha reserva|minhas reservas|ver reserva|ver minhas reservas|consultar reserva|historico de reservas|minhas locacoes|meus agendamentos)\b/.test(texto)
+  const falaDePagamento = /\b(pagar|pagamento|pix|cartao|boleto|paguei|confirmar pagamento|comprovante)\b/.test(texto)
+  const falaDeLogin = /\b(login|entrar|senha|cadastro|cadastrar|conta|acesso)\b/.test(texto)
+  const falaDeAdmin = /\b(admin|administrador|painel admin|area admin|cadastrar carro|editar carro|remover carro)\b/.test(texto)
 
   return (
     (falaDeReserva && falaDeCancelamento) ||
@@ -80,9 +65,7 @@ function pareceFluxoComCards(textoUsuario, intent) {
   const texto = normalizarTexto(textoUsuario)
   const intentNormalizada = normalizarTexto(intent)
 
-  if (INTENTS_COM_CARDS.has(intentNormalizada)) {
-    return true
-  }
+  if (INTENTS_COM_CARDS.has(intentNormalizada)) return true
 
   return (
     /\b(reservar|alugar|locar)\b.*\b(carro|veiculo)\b/.test(texto) ||
@@ -93,52 +76,52 @@ function pareceFluxoComCards(textoUsuario, intent) {
   )
 }
 
+function normalizarRespostaChatbot(payload) {
+  if (Array.isArray(payload)) {
+    return {
+      resposta: payload.map(item => item?.text).filter(Boolean).join('\n'),
+      intent: 'fallback',
+      confidence: 0,
+      showCards: false,
+      cards: [],
+      error: false,
+    }
+  }
+
+  return {
+    resposta:
+      payload?.resposta ||
+      payload?.text ||
+      payload?.message ||
+      'Nao consegui entender sua solicitacao. Pode reformular?',
+    intent: payload?.intent || payload?.intencao || 'fallback',
+    confidence: Number(payload?.confidence || payload?.confianca || 0),
+    showCards: Boolean(payload?.showCards || payload?.mostrarCards || payload?.exibirCards),
+    cards: payload?.cards || payload?.carros || payload?.vehicles || [],
+    error: Boolean(payload?.error),
+  }
+}
+
 function obterCardsPermitidos(data, textoUsuario) {
-  const cardsRecebidos = data?.cards || data?.carros || data?.vehicles
-  const cards = Array.isArray(cardsRecebidos) ? cardsRecebidos.filter(Boolean) : []
+  const cards = Array.isArray(data.cards) ? data.cards.filter(Boolean) : []
 
-  if (!cards.length) {
-    return []
-  }
+  if (!cards.length) return []
+  if (data.showCards !== true) return []
 
-  const intent = data?.intent || data?.intencao || ''
+  const intent = normalizarTexto(data.intent)
 
-  // Nova solução ideal: backend manda showCards explicitamente.
-  if (
-    data?.showCards === false ||
-    data?.mostrarCards === false ||
-    data?.exibirCards === false
-  ) {
-    return []
-  }
+  if (!INTENTS_COM_CARDS.has(intent)) return []
+  if (INTENTS_SEM_CARDS.has(intent)) return []
+  if (pareceFluxoSemCards(textoUsuario, intent)) return []
+  if (!pareceFluxoComCards(textoUsuario, intent)) return []
 
-  // Camada de segurança do front: mesmo que o backend erre, bloqueia cards.
-  if (pareceFluxoSemCards(textoUsuario, intent)) {
-    return []
-  }
-
-  // Nova solução ideal: backend autoriza exibir cards.
-  if (
-    (data?.showCards === true ||
-      data?.mostrarCards === true ||
-      data?.exibirCards === true) &&
-    INTENTS_COM_CARDS.has(normalizarTexto(intent))
-  ) {
-    return cards
-  }
-
-  // Compatibilidade com backend antigo: só mostra cards se a intenção parecer fluxo de carros.
-  if (pareceFluxoComCards(textoUsuario, intent)) {
-    return cards
-  }
-
-  return []
+  return cards
 }
 
 export default function Chatbot() {
   const [aberto, setAberto] = useState(false)
   const [mensagens, setMensagens] = useState([
-    { de: 'bot', texto: 'Olá! Sou o assistente do AgendaCar. Como posso ajudar?' },
+    { de: 'bot', texto: 'Ola! Sou o assistente do AgendaCar. Como posso ajudar?' },
   ])
   const [input, setInput] = useState('')
   const [carregando, setCarregando] = useState(false)
@@ -159,20 +142,14 @@ export default function Chatbot() {
 
     try {
       const { data } = await api.post('/chatbot', { mensagem: texto })
-
-      const resposta =
-        data?.resposta ||
-        data?.text ||
-        data?.message ||
-        'Não consegui entender sua solicitação. Pode reformular?'
-
-      const cardsPermitidos = obterCardsPermitidos(data, texto)
+      const respostaNormalizada = normalizarRespostaChatbot(data)
+      const cardsPermitidos = obterCardsPermitidos(respostaNormalizada, texto)
 
       setMensagens(prev => [
         ...prev,
         {
           de: 'bot',
-          texto: resposta,
+          texto: respostaNormalizada.resposta,
           cards: cardsPermitidos,
         },
       ])
@@ -181,7 +158,7 @@ export default function Chatbot() {
         ...prev,
         {
           de: 'bot',
-          texto: 'Erro de conexão. Tente novamente.',
+          texto: 'Erro de conexao. Tente novamente.',
           cards: [],
         },
       ])
@@ -275,7 +252,7 @@ export default function Chatbot() {
                           </p>
 
                           <p className="text-xs text-gray-500">
-                            {card.tipo} • {card.capacidade} lugares • {card.transmissao}
+                            {card.tipo} - {card.capacidade} lugares - {card.transmissao}
                           </p>
 
                           <p className="text-xs text-gray-700">

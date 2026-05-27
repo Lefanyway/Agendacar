@@ -34,16 +34,16 @@ responses:
     - text: "De nada! Quando quiser comparar carros ou tirar duvida sobre reserva, pode chamar."
 
   utter_reservar_carro:
-    - text: "Para reservar, abra um card de carro, confira diaria, capacidade e disponibilidade, clique no veiculo desejado e informe o periodo. Depois revise os dados e avance para o pagamento."
+    - text: "Claro. Escolha um carro disponivel nos cards abaixo. Depois informe o periodo da reserva e confirme pelo sistema."
 
   utter_reservar_modelo:
     - text: "Para reservar esse modelo, encontre o card dele na tela inicial, confira disponibilidade e diaria, abra os detalhes e informe o periodo da reserva."
 
   utter_cancelar_reserva:
-    - text: "Para cancelar, acesse Minhas Reservas e escolha a reserva desejada. O sistema permite cancelar apenas reservas da conta logada."
+    - text: "Entendi que voce quer cancelar uma reserva. Eu nao cancelo automaticamente pelo chat. Acesse Minhas Reservas, escolha a reserva desejada e use a opcao de cancelamento."
 
   utter_consultar_carros:
-    - text: "Na tela inicial, veja os cards dos carros. Cada card mostra modelo, diaria, capacidade, transmissao e disponibilidade. Para reservar, clique no carro desejado e informe o periodo."
+    - text: "Encontrei os carros disponiveis no sistema. Confira os cards abaixo."
 
   utter_consultar_modelo:
     - text: "Use a busca da tela inicial para procurar o modelo. O card mostra diaria, capacidade, transmissao e disponibilidade antes da reserva."
@@ -58,7 +58,7 @@ responses:
     - text: "A disponibilidade aparece no card do carro. Se estiver indisponivel, escolha outro modelo ou tente consultar a frota novamente depois."
 
   utter_pagamento:
-    - text: "O pagamento vem depois da escolha do carro e do periodo. Antes de finalizar, confira veiculo, datas, destino e valor total."
+    - text: "O pagamento deve ser feito na etapa de finalizacao da reserva. Confira as opcoes disponiveis diretamente na tela de pagamento."
 
   utter_area_admin:
     - text: "A area administrativa permite cadastrar, editar e remover carros da frota. Ela e restrita a usuarios com perfil de administrador."
@@ -73,19 +73,19 @@ responses:
     - text: "Confira email e senha digitados. Se o problema continuar, tente cadastrar novamente ou procure suporte. Por seguranca, nao envie senha pelo chat."
 
   utter_minhas_reservas:
-    - text: "Suas reservas ficam em Minhas Reservas. La voce acompanha carro, periodo, valor e status da reserva feita pela sua conta."
+    - text: "Voce pode consultar suas reservas acessando Minhas Reservas apos fazer login."
 
   utter_alterar_reserva:
-    - text: "No momento, a forma segura de alterar e cancelar a reserva atual e criar uma nova com o carro, datas e destino corretos."
+    - text: "Para alterar uma reserva, acesse Minhas Reservas e selecione a reserva desejada. Se o sistema nao permitir edicao direta, cancele e faca uma nova reserva com os dados corretos."
 
   utter_suporte_humano:
     - text: "Se precisar de ajuda humana, procure o responsavel pelo sistema ou o suporte informado pela equipe do AgendaCar."
 
   utter_fora_escopo:
-    - text: "Essa pergunta foge do AgendaCar. Posso ajudar apenas com carros, reservas, pagamento, login, cancelamento, recomendacoes e area administrativa."
+    - text: "Consigo ajudar apenas com assuntos do AgendaCar, como carros, reservas, pagamento, login, cancelamento e suporte."
 
   utter_fallback:
-    - text: "Nao tenho certeza do que voce quis dizer. Pode reformular? Eu ajudo com carros, reservas, pagamento, login, cancelamento, recomendacoes e area admin."
+    - text: "Nao consegui entender com seguranca. Voce quer reservar um carro, consultar suas reservas, cancelar uma reserva ou falar sobre pagamento?"
 
 session_config:
   session_expiration_time: 60

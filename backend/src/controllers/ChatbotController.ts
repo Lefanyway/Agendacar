@@ -8,7 +8,12 @@ class ChatbotController {
 
       if (!mensagem || typeof mensagem !== "string") {
         return res.status(400).json({
-          erro: "O campo mensagem é obrigatório."
+          resposta: "Nao consegui entender com seguranca. Pode reformular sua pergunta?",
+          intent: "fallback",
+          confidence: 0,
+          showCards: false,
+          cards: [],
+          error: false
         });
       }
 
@@ -18,9 +23,14 @@ class ChatbotController {
       );
 
       return res.json(resposta);
-    } catch (error: any) {
+    } catch {
       return res.status(500).json({
-        erro: error.message || "Erro ao processar mensagem do chatbot."
+        resposta: "Tive um problema ao processar sua mensagem. Pode tentar digitar de novo?",
+        intent: "erro",
+        confidence: 0,
+        showCards: false,
+        cards: [],
+        error: true
       });
     }
   }

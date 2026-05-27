@@ -1,9 +1,11 @@
 import carroService from "./CarroService";
 
-type ChatbotOrigem = "rasa" | "fallback" | "sistema";
+type ChatbotOrigem = "sistema" | "rasa" | "fallback";
 
 type ChatbotIntent =
   | "saudacao"
+  | "agradecimento"
+  | "despedida"
   | "ajuda_geral"
   | "consultar_carros"
   | "reservar_carro"
@@ -19,7 +21,8 @@ type ChatbotIntent =
   | "area_admin"
   | "suporte_humano"
   | "fora_escopo"
-  | "fallback";
+  | "fallback"
+  | "erro";
 
 interface RasaMessage {
   recipient_id?: string;
@@ -47,6 +50,7 @@ interface ChatbotResponse {
   confidence: number;
   showCards: boolean;
   cards: ChatbotCard[];
+  error: boolean;
 }
 
 interface CarroNormalizado {
@@ -74,45 +78,71 @@ interface IntentConfig {
 }
 
 const INTENTS_COM_CARDS = new Set<ChatbotIntent>([
-  "reservar_carro",
   "consultar_carros",
+  "reservar_carro",
   "consultar_modelo",
   "filtros_carros",
   "recomendacao_carro"
 ]);
 
+const RESPOSTAS: Record<ChatbotIntent, string> = {
+  saudacao:
+    "Ola! Posso ajudar com carros, reservas, pagamento, login, cancelamento, recomendacoes e area administrativa. Sobre qual assunto voce quer falar?",
+  agradecimento:
+    "De nada! Quando quiser consultar carros ou tirar duvidas sobre reservas, pode chamar.",
+  despedida:
+    "Ate mais! Quando quiser consultar ou reservar um carro, estou por aqui.",
+  ajuda_geral:
+    "Posso ajudar com carros disponiveis, reserva, cancelamento, pagamento, login, recomendacoes e area administrativa.",
+  consultar_carros:
+    "Encontrei os carros disponiveis no sistema. Confira os cards abaixo.",
+  reservar_carro:
+    "Claro. Escolha um carro disponivel nos cards abaixo. Depois informe o periodo da reserva e confirme pelo sistema.",
+  recomendacao_carro:
+    "Encontrei algumas opcoes com base no que voce pediu. Confira os cards abaixo e abra um carro para ver os detalhes.",
+  filtros_carros:
+    "Encontrei alguns carros com esse perfil. Confira os cards abaixo.",
+  consultar_modelo:
+    "Encontrei este modelo na frota. Confira o card abaixo.",
+  cancelar_reserva:
+    "Entendi que voce quer cancelar uma reserva. Eu nao cancelo automaticamente pelo chat. Acesse Minhas Reservas, escolha a reserva desejada e use a opcao de cancelamento.",
+  alterar_reserva:
+    "Para alterar uma reserva, acesse Minhas Reservas e selecione a reserva desejada. Se o sistema nao permitir edicao direta, cancele e faca uma nova reserva com os dados corretos.",
+  minhas_reservas:
+    "Voce pode consultar suas reservas acessando Minhas Reservas apos fazer login.",
+  pagamento:
+    "O pagamento deve ser feito na etapa de finalizacao da reserva. Confira as opcoes disponiveis diretamente na tela de pagamento.",
+  login_cadastro:
+    "Use a tela de login para entrar com email e senha. Se ainda nao tiver conta, faca o cadastro antes de reservar.",
+  problema_login:
+    "Confira email e senha digitados. Se o problema continuar, tente cadastrar novamente ou procure suporte. Por seguranca, nao envie senha pelo chat.",
+  area_admin:
+    "A area administrativa e restrita a usuarios administradores e permite cadastrar, editar e remover carros da frota.",
+  suporte_humano:
+    "Se precisar de ajuda humana, procure o responsavel pelo sistema ou o suporte informado pela equipe do AgendaCar.",
+  fora_escopo:
+    "Consigo ajudar apenas com assuntos do AgendaCar, como carros, reservas, pagamento, login, cancelamento e suporte.",
+  fallback:
+    "Nao consegui entender com seguranca. Voce quer reservar um carro, consultar suas reservas, cancelar uma reserva ou falar sobre pagamento?",
+  erro:
+    "Tive um problema ao processar sua mensagem. Pode tentar digitar de novo?"
+};
+
 const INTENTS_CONFIG: IntentConfig[] = [
-  {
-    intent: "problema_login",
-    prioridade: 1,
-    termos: {
-      "nao consigo entrar": 8,
-      "login nao funciona": 8,
-      "erro no login": 8,
-      "senha errada": 7,
-      "esqueci minha senha": 7,
-      "email invalido": 6,
-      "problema no cadastro": 6
-    }
-  },
   {
     intent: "area_admin",
     prioridade: 1,
     termos: {
-      "area admin": 7,
-      "area administrativa": 7,
-      "sou admin": 6,
-      "administrador": 5,
-      "painel admin": 6,
-      "cadastrar carro": 7,
-      "cadastrar um carro": 8,
-      "cadastrar veiculo": 7,
-      "cadastrar um veiculo": 8,
-      "editar carro": 7,
-      "editar um carro": 8,
-      "remover carro": 7,
-      "remover um carro": 8,
-      "deletar carro": 7
+      "area admin": 8,
+      "area administrativa": 8,
+      "sou admin": 7,
+      administrador: 6,
+      "painel admin": 7,
+      "cadastrar carro": 9,
+      "cadastrar um carro": 9,
+      "editar carro": 9,
+      "remover carro": 9,
+      "deletar carro": 9
     }
   },
   {
@@ -122,11 +152,12 @@ const INTENTS_CONFIG: IntentConfig[] = [
       "cancelar minha reserva": 10,
       "cancelar reserva": 9,
       "como cancelo uma reserva": 9,
-      "cancelamento": 7,
-      "cancelar": 5,
-      "desmarcar": 6,
-      "desfazer": 6,
-      "desistir": 6,
+      "como cancelar uma reserva": 9,
+      cancelamento: 7,
+      cancelar: 5,
+      desmarcar: 6,
+      desfazer: 6,
+      desistir: 6,
       "remover reserva": 9
     }
   },
@@ -136,32 +167,29 @@ const INTENTS_CONFIG: IntentConfig[] = [
     termos: {
       "alterar minha reserva": 10,
       "alterar reserva": 9,
-      "mudar a data": 8,
+      "mudar a data": 9,
       "mudar data": 8,
       "trocar data": 8,
-      "remarcar": 7,
+      remarcar: 7,
       "editar reserva": 8,
-      "trocar carro": 6,
-      "data errada": 7
+      "data errada": 7,
+      reagendar: 7
     }
   },
   {
     intent: "minhas_reservas",
     prioridade: 4,
     termos: {
-      "minhas reservas": 10,
-      "minha reserva": 7,
       "onde vejo minhas reservas": 10,
+      "minhas reservas": 10,
+      "ver minhas reservas": 10,
       "consultar minhas reservas": 10,
       "quero ver minha reserva": 10,
       "onde esta minha reserva": 10,
-      "ver minhas reservas": 10,
-      "ver reserva": 7,
-      "consultar reserva": 7,
-      "meus agendamentos": 8,
-      "historico de reservas": 7,
+      "historico de reservas": 8,
       "reservas feitas": 8,
       "minhas locacoes": 8,
+      "meus agendamentos": 8,
       "status da reserva": 7
     }
   },
@@ -170,32 +198,58 @@ const INTENTS_CONFIG: IntentConfig[] = [
     prioridade: 5,
     termos: {
       "pagar minha reserva": 9,
-      "pagamento": 6,
-      "pagar": 6,
-      "pix": 6,
-      "cartao": 6,
-      "boleto": 6,
-      "comprovante": 6,
+      "confirma meu pagamento": 9,
+      "confirme meu pagamento": 9,
       "confirmar pagamento": 8,
-      "confirme meu pagamento": 8,
+      pagamento: 6,
+      pagar: 6,
+      pix: 6,
+      cartao: 6,
+      boleto: 6,
+      comprovante: 6,
       "valor total": 5
     }
   },
   {
-    intent: "suporte_humano",
+    intent: "problema_login",
     prioridade: 6,
+    termos: {
+      "nao consigo entrar": 8,
+      "login nao funciona": 8,
+      "erro no login": 8,
+      "senha errada": 7,
+      "esqueci minha senha": 8,
+      "email invalido": 6,
+      "problema no cadastro": 6
+    }
+  },
+  {
+    intent: "login_cadastro",
+    prioridade: 7,
+    termos: {
+      login: 5,
+      "entrar na conta": 7,
+      "criar conta": 7,
+      cadastro: 5,
+      "fazer cadastro": 7,
+      "acessar minha conta": 7
+    }
+  },
+  {
+    intent: "suporte_humano",
+    prioridade: 8,
     termos: {
       "suporte humano": 8,
       "falar com atendente": 8,
       "falar com alguem": 7,
-      "atendimento": 5,
-      "responsavel": 5,
-      "suporte": 5
+      atendimento: 5,
+      responsavel: 5,
+      suporte: 5
     }
   },
   {
     intent: "reservar_carro",
-    prioridade: 7,
+    prioridade: 9,
     termos: {
       "quero reservar um carro": 10,
       "reservar um carro": 9,
@@ -210,22 +264,21 @@ const INTENTS_CONFIG: IntentConfig[] = [
   },
   {
     intent: "consultar_carros",
-    prioridade: 8,
+    prioridade: 10,
     termos: {
-      "quais carros": 9,
+      "me mostra todos os carros": 10,
+      "todos os carros": 9,
       "quais carros voces tem": 9,
+      "quais carros": 9,
       "carros disponiveis": 9,
+      "modelos disponiveis": 8,
+      "quero ver os carros": 9,
       "ver carros": 8,
       "mostrar carros": 8,
       "mostra carros": 8,
       "mostre os carros": 8,
-      "me mostra os carros": 9,
-      "me mostra todos os carros": 10,
-      "todos os carros": 9,
       "listar carros": 8,
       "liste os carros": 8,
-      "modelos disponiveis": 8,
-      "quero ver os carros": 9,
       "tem carro automatico": 9,
       "tem carro manual": 9,
       "tem suv": 8,
@@ -234,7 +287,7 @@ const INTENTS_CONFIG: IntentConfig[] = [
   },
   {
     intent: "recomendacao_carro",
-    prioridade: 9,
+    prioridade: 13,
     termos: {
       "me recomenda": 9,
       "recomenda um carro": 9,
@@ -249,11 +302,11 @@ const INTENTS_CONFIG: IntentConfig[] = [
   },
   {
     intent: "filtros_carros",
-    prioridade: 9,
+    prioridade: 12,
     termos: {
-      "filtrar": 7,
-      "filtro": 7,
-      "ordenar": 7,
+      filtrar: 7,
+      filtro: 7,
+      ordenar: 7,
       "menor preco": 8,
       "maior preco": 8,
       "por capacidade": 7,
@@ -261,127 +314,98 @@ const INTENTS_CONFIG: IntentConfig[] = [
     }
   },
   {
-    intent: "login_cadastro",
-    prioridade: 1,
-    termos: {
-      "login": 5,
-      "entrar na conta": 7,
-      "criar conta": 7,
-      "cadastro": 5,
-      "cadastrar": 5,
-      "acessar minha conta": 7
-    }
-  },
-  {
     intent: "saudacao",
-    prioridade: 10,
+    prioridade: 14,
     termos: {
-      "oi": 4,
-      "ola": 4,
+      oi: 4,
+      ola: 4,
       "bom dia": 5,
       "boa tarde": 5,
       "boa noite": 5,
-      "ajuda": 3
+      ajuda: 3
+    }
+  },
+  {
+    intent: "agradecimento",
+    prioridade: 15,
+    termos: {
+      obrigado: 6,
+      obrigada: 6,
+      valeu: 6,
+      vlw: 6
+    }
+  },
+  {
+    intent: "despedida",
+    prioridade: 16,
+    termos: {
+      tchau: 6,
+      "ate mais": 6,
+      falou: 5,
+      sair: 4,
+      encerrar: 5
     }
   }
 ];
-
-const RESPOSTAS: Record<ChatbotIntent, string> = {
-  saudacao:
-    "Olá! Posso ajudar com carros, reservas, pagamento, login, cancelamento, recomendações e área administrativa. Sobre qual assunto você quer falar?",
-  ajuda_geral:
-    "Posso ajudar com carros disponíveis, reserva, cancelamento, pagamento, login, recomendações e área administrativa.",
-  consultar_carros:
-    "Encontrei alguns carros para você. Confira os cards abaixo.",
-  reservar_carro:
-    "Claro. Escolha um carro disponível nos cards abaixo. Depois informe o período da reserva e confirme pelo sistema.",
-  recomendacao_carro:
-    "Encontrei algumas opções com base no que você pediu. Confira os cards abaixo e abra um carro para ver os detalhes.",
-  filtros_carros:
-    "Encontrei alguns carros com esse perfil. Confira os cards abaixo.",
-  consultar_modelo:
-    "Encontrei este modelo na frota. Confira o card abaixo.",
-  cancelar_reserva:
-    "Entendi que você quer cancelar uma reserva. Eu não cancelo automaticamente pelo chat. Acesse Minhas Reservas, escolha a reserva desejada e use a opção de cancelamento.",
-  alterar_reserva:
-    "Para alterar uma reserva, acesse Minhas Reservas e selecione a reserva desejada. Se o sistema não permitir edição direta, cancele e faça uma nova reserva com os dados corretos.",
-  minhas_reservas:
-    "Você pode consultar suas reservas acessando Minhas Reservas após fazer login.",
-  pagamento:
-    "O pagamento deve ser feito na etapa de finalização da reserva. Confira as opções disponíveis diretamente na tela de pagamento.",
-  login_cadastro:
-    "Use a tela de login para entrar com email e senha. Se ainda não tiver conta, faça o cadastro antes de reservar.",
-  problema_login:
-    "Confira email e senha digitados. Se o problema continuar, tente cadastrar novamente ou procure suporte. Por segurança, não envie senha pelo chat.",
-  area_admin:
-    "A área administrativa é restrita a usuários administradores e permite cadastrar, editar e remover carros da frota.",
-  suporte_humano:
-    "Se precisar de ajuda humana, procure o responsável pelo sistema ou o suporte informado pela equipe do AgendaCar.",
-  fora_escopo:
-    "Consigo ajudar apenas com assuntos do AgendaCar, como carros, reservas, pagamento, login, cancelamento e suporte.",
-  fallback:
-    "Não consegui entender com segurança. Você quer reservar um carro, consultar suas reservas, cancelar uma reserva ou falar sobre pagamento?"
-};
 
 class ChatbotService {
   async responder(
     mensagem: string,
     sender = "usuario-agendacar"
   ): Promise<ChatbotResponse> {
-    const textoOriginal = mensagem.trim();
-    const texto = this.normalizar(textoOriginal);
-
-    if (!texto) {
-      return this.montarResposta(
-        "fallback",
-        textoOriginal ? RESPOSTAS.fallback : "Digite uma mensagem para eu conseguir ajudar.",
-        0.3,
-        []
-      );
-    }
-
-    const classificacao = this.classificarIntencao(texto);
-
-    if (classificacao.ambigua) {
-      return this.montarResposta(
-        "fallback",
-        this.montarPerguntaAmbigua(classificacao.ambigua),
-        classificacao.confidence,
-        []
-      );
-    }
-
-    if (classificacao.intent === "fora_escopo" || classificacao.intent === "fallback") {
-      return this.montarResposta(
-        classificacao.intent,
-        this.respostaFallbackPorTexto(texto, classificacao.intent),
-        classificacao.confidence,
-        []
-      );
-    }
-
-    if (INTENTS_COM_CARDS.has(classificacao.intent)) {
-      return this.responderComCards(classificacao, texto);
-    }
-
-    if (classificacao.intent === "saudacao" && texto === "ajuda") {
-      return this.montarResposta("ajuda_geral", RESPOSTAS.ajuda_geral, 0.75, []);
-    }
-
-    if (classificacao.confidence >= 0.55) {
-      return this.montarResposta(
-        classificacao.intent,
-        RESPOSTAS[classificacao.intent],
-        classificacao.confidence,
-        []
-      );
-    }
-
     try {
-      const respostaRasa = await this.enviarParaRasa(textoOriginal, sender);
-      return this.montarResposta("fallback", respostaRasa, 0.45, []);
+      const textoOriginal = mensagem.trim();
+      const texto = this.normalizar(textoOriginal);
+
+      if (!texto) {
+        return this.montarResposta("fallback", RESPOSTAS.fallback, 0, []);
+      }
+
+      const classificacao = this.classificarIntencao(texto);
+
+      if (classificacao.ambigua) {
+        return this.montarResposta(
+          "fallback",
+          this.montarPerguntaAmbigua(classificacao.ambigua),
+          classificacao.confidence,
+          []
+        );
+      }
+
+      if (classificacao.intent === "fora_escopo" || classificacao.intent === "fallback") {
+        return this.montarResposta(
+          classificacao.intent,
+          this.respostaFallbackPorTexto(texto, classificacao.intent),
+          classificacao.confidence,
+          []
+        );
+      }
+
+      if (INTENTS_COM_CARDS.has(classificacao.intent)) {
+        return this.responderComCards(classificacao, texto);
+      }
+
+      if (classificacao.intent === "saudacao" && texto === "ajuda") {
+        return this.montarResposta("ajuda_geral", RESPOSTAS.ajuda_geral, 0.75, []);
+      }
+
+      if (classificacao.confidence >= 0.55) {
+        return this.montarResposta(
+          classificacao.intent,
+          RESPOSTAS[classificacao.intent],
+          classificacao.confidence,
+          []
+        );
+      }
+
+      try {
+        const respostaRasa = await this.enviarParaRasa(textoOriginal, sender);
+        return this.montarResposta("fallback", respostaRasa, 0.45, []);
+      } catch {
+        return this.montarResposta("fallback", RESPOSTAS.fallback, 0.35, []);
+      }
     } catch {
-      return this.montarResposta("fallback", RESPOSTAS.fallback, 0.35, []);
+      return this.montarResposta("erro", RESPOSTAS.erro, 0, []);
     }
   }
 
@@ -390,10 +414,10 @@ class ChatbotService {
       return { intent: "fora_escopo", confidence: 0.95 };
     }
 
-    const respostaGenerica = this.classificarTermoGenerico(texto);
+    const generica = this.classificarTermoGenerico(texto);
 
-    if (respostaGenerica) {
-      return respostaGenerica;
+    if (generica) {
+      return generica;
     }
 
     const scores = INTENTS_CONFIG
@@ -412,10 +436,7 @@ class ChatbotService {
       })
       .filter((item) => item.score > 0)
       .sort((a, b) => {
-        if (b.score !== a.score) {
-          return b.score - a.score;
-        }
-
+        if (b.score !== a.score) return b.score - a.score;
         return a.prioridade - b.prioridade;
       });
 
@@ -426,7 +447,7 @@ class ChatbotService {
     const melhor = scores[0];
     const segundo = scores[1];
 
-    if (melhor.score < 5 && !["saudacao"].includes(melhor.intent)) {
+    if (melhor.score < 5 && melhor.intent !== "saudacao") {
       return { intent: "fallback", confidence: 0.45 };
     }
 
@@ -443,25 +464,19 @@ class ChatbotService {
       };
     }
 
-    const confidence = Math.min(0.98, Math.max(0.55, melhor.score / 10));
-
     return {
       intent: melhor.intent,
-      confidence: Number(confidence.toFixed(2))
+      confidence: Number(Math.min(0.98, Math.max(0.55, melhor.score / 10)).toFixed(2))
     };
   }
 
   private classificarTermoGenerico(texto: string): Classificacao | null {
-    if (texto === "reserva" || texto === "reservas") {
+    if (["reserva", "reservas", "carro", "carros", "pagamento", "ajuda"].includes(texto)) {
       return { intent: "fallback", confidence: 0.45 };
     }
 
-    if (texto === "carro" || texto === "carros") {
-      return { intent: "fallback", confidence: 0.45 };
-    }
-
-    if (texto === "pagamento" || texto === "ajuda") {
-      return { intent: "fallback", confidence: 0.45 };
+    if (/^[?/\s.!,]+$/.test(texto)) {
+      return { intent: "fallback", confidence: 0 };
     }
 
     return null;
@@ -476,19 +491,19 @@ class ChatbotService {
     if (!carros.length) {
       return this.montarResposta(
         classificacao.intent,
-        "Não encontrei carros cadastrados no momento. Tente novamente mais tarde ou fale com o suporte.",
+        "Nao encontrei carros cadastrados no momento. Tente novamente mais tarde ou fale com o suporte.",
         classificacao.confidence,
         []
       );
     }
 
-    const carrosFiltrados = this.filtrarCarros(carros, texto, classificacao.intent);
-    const cards = carrosFiltrados.slice(0, 4).map((carro) => this.montarCard(carro));
+    const filtrados = this.filtrarCarros(carros, texto, classificacao.intent);
+    const cards = filtrados.slice(0, 4).map((carro) => this.montarCard(carro));
 
     if (!cards.length) {
       return this.montarResposta(
         classificacao.intent,
-        "Não encontrei carros com esse perfil. Tente mudar o tipo, orçamento ou consulte todos os modelos na tela inicial.",
+        "Nao encontrei carros com esse perfil. Tente mudar o tipo, orcamento ou consulte todos os modelos na tela inicial.",
         classificacao.confidence,
         []
       );
@@ -496,10 +511,18 @@ class ChatbotService {
 
     return this.montarResposta(
       classificacao.intent,
-      RESPOSTAS[classificacao.intent],
+      this.montarRespostaComCards(classificacao.intent, cards),
       classificacao.confidence,
       cards
     );
+  }
+
+  private montarRespostaComCards(intent: ChatbotIntent, cards: ChatbotCard[]) {
+    if (intent === "consultar_carros") {
+      return `Encontrei ${cards.length} carro(s) para voce. Confira os cards abaixo.`;
+    }
+
+    return RESPOSTAS[intent];
   }
 
   private filtrarCarros(
@@ -514,9 +537,7 @@ class ChatbotService {
     const minCapacidade = this.extrairCapacidade(texto);
     const modelo = this.extrairModelo(texto, carros);
 
-    if (modelo) {
-      resultado = resultado.filter((carro) => carro.id === modelo.id);
-    }
+    if (modelo) resultado = resultado.filter((carro) => carro.id === modelo.id);
 
     if (tipo) {
       resultado = resultado.filter((carro) =>
@@ -530,17 +551,9 @@ class ChatbotService {
       );
     }
 
-    if (precoMaximo) {
-      resultado = resultado.filter((carro) => carro.precoDia <= precoMaximo);
-    }
-
-    if (minCapacidade) {
-      resultado = resultado.filter((carro) => carro.capacidade >= minCapacidade);
-    }
-
-    if (intent === "reservar_carro") {
-      resultado = resultado.filter((carro) => carro.disponivel);
-    }
+    if (precoMaximo) resultado = resultado.filter((carro) => carro.precoDia <= precoMaximo);
+    if (minCapacidade) resultado = resultado.filter((carro) => carro.capacidade >= minCapacidade);
+    if (intent === "reservar_carro") resultado = resultado.filter((carro) => carro.disponivel);
 
     return resultado.sort((a, b) => a.precoDia - b.precoDia);
   }
@@ -559,7 +572,8 @@ class ChatbotService {
       intent,
       confidence: Number(confidence.toFixed(2)),
       showCards,
-      cards: showCards ? cards : []
+      cards: showCards ? cards : [],
+      error: intent === "erro"
     };
   }
 
@@ -570,23 +584,21 @@ class ChatbotService {
       alterar_reserva: "alterar uma reserva",
       minhas_reservas: "consultar suas reservas",
       pagamento: "falar sobre pagamento",
-      consultar_carros: "ver carros disponíveis"
+      consultar_carros: "ver carros disponiveis"
     };
 
-    return `Fiquei em dúvida se você quer ${nomes[intents[0]] || intents[0]} ou ${nomes[intents[1]] || intents[1]}. Pode confirmar em uma frase curta?`;
+    return `Fiquei em duvida se voce quer ${nomes[intents[0]] || intents[0]} ou ${nomes[intents[1]] || intents[1]}. Pode confirmar em uma frase curta?`;
   }
 
   private respostaFallbackPorTexto(texto: string, intent: ChatbotIntent) {
-    if (intent === "fora_escopo") {
-      return RESPOSTAS.fora_escopo;
-    }
+    if (intent === "fora_escopo") return RESPOSTAS.fora_escopo;
 
     if (texto === "reserva" || texto === "reservas") {
-      return "Você quer criar uma nova reserva, consultar suas reservas, alterar ou cancelar uma reserva?";
+      return "Voce quer criar uma nova reserva, consultar suas reservas, alterar ou cancelar uma reserva?";
     }
 
     if (texto === "carro" || texto === "carros") {
-      return "Você quer consultar carros disponíveis, reservar um carro ou receber uma recomendação?";
+      return "Voce quer consultar carros disponiveis, reservar um carro ou receber uma recomendacao?";
     }
 
     return RESPOSTAS.fallback;
@@ -623,7 +635,7 @@ class ChatbotService {
       tanque: carro.tanque,
       precoDia: carro.precoDia,
       disponivel: carro.disponivel,
-      acaoTexto: carro.disponivel ? "Reservar agora" : "Indisponível",
+      acaoTexto: carro.disponivel ? "Reservar agora" : "Indisponivel",
       url: `/carros/${carro.id}`
     };
   }
@@ -653,10 +665,7 @@ class ChatbotService {
 
     for (const padrao of padroes) {
       const match = texto.match(padrao);
-
-      if (match?.[1]) {
-        return Number(match[1]);
-      }
+      if (match?.[1]) return Number(match[1]);
     }
 
     return null;
@@ -664,24 +673,14 @@ class ChatbotService {
 
   private extrairCapacidade(texto: string): number | null {
     const match = texto.match(/(\d+)\s*(pessoas|passageiros|lugares)/);
-
-    if (match?.[1]) {
-      return Number(match[1]);
-    }
-
-    if (this.contemTermo(texto, "familia")) {
-      return 5;
-    }
-
+    if (match?.[1]) return Number(match[1]);
+    if (this.contemTermo(texto, "familia")) return 5;
     return null;
   }
 
   private extrairModelo(texto: string, carros: CarroNormalizado[]) {
     const textoLimpo = this.removerTermosComuns(texto);
-
-    if (!textoLimpo || textoLimpo.length < 2) {
-      return null;
-    }
+    if (!textoLimpo || textoLimpo.length < 2) return null;
 
     return carros.find((carro) =>
       this.normalizar(carro.nome)
@@ -695,18 +694,11 @@ class ChatbotService {
 
     const response = await fetch(`${baseUrl}/webhooks/rest/webhook`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        sender,
-        message: mensagem
-      })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sender, message: mensagem })
     });
 
-    if (!response.ok) {
-      throw new Error("Erro ao consultar o Rasa.");
-    }
+    if (!response.ok) throw new Error("Erro ao consultar o Rasa.");
 
     const data = (await response.json()) as RasaMessage[];
     const textos = data
@@ -735,27 +727,19 @@ class ChatbotService {
       "fodase"
     ];
 
-    if (/^[?/\s.!,]+$/.test(texto)) {
-      return false;
-    }
-
     return termos.some((termo) => this.contemTermo(texto, termo));
   }
 
   private removerTermosComuns(texto: string) {
     return texto
-      .replace(/\b(quero|ver|mostrar|mostra|tem|carro|carros|veiculo|veiculos|modelo|reservar|alugar|locar|agendar|disponivel|pra|para|um|uma|o|a|de|da|do|com|por|favor)\b/g, " ")
+      .replace(/\b(quero|ver|mostrar|mostra|mostre|listar|liste|tem|carro|carros|veiculo|veiculos|modelo|reservar|alugar|locar|agendar|disponivel|pra|para|um|uma|o|a|de|da|do|com|por|favor|todos|os)\b/g, " ")
       .replace(/\s+/g, " ")
       .trim();
   }
 
   private contemTermo(texto: string, termo: string): boolean {
     const termoNormalizado = this.normalizar(termo);
-
-    if (termoNormalizado.includes(" ")) {
-      return texto.includes(termoNormalizado);
-    }
-
+    if (termoNormalizado.includes(" ")) return texto.includes(termoNormalizado);
     return new RegExp(`\\b${termoNormalizado}\\b`).test(texto);
   }
 
@@ -768,7 +752,6 @@ class ChatbotService {
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
-      .replace(/ç/g, "c")
       .replace(/[^\w\s]/g, " ")
       .replace(/\s+/g, " ")
       .trim();

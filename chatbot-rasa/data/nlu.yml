@@ -79,9 +79,16 @@ nlu:
   - intent: consultar_carros
     examples: |
       - quais carros tem?
+      - quais carros voces tem?
       - quais carros estao disponiveis?
       - quero ver os carros
       - mostrar carros
+      - mostra carros
+      - mostre os carros
+      - me mostra todos os carros
+      - todos os carros
+      - listar carros
+      - liste os carros
       - mostrar carros disponiveis
       - ver veiculos
       - consultar frota
@@ -172,6 +179,10 @@ nlu:
       - como faco o pagamento?
       - onde pago?
       - quando eu pago?
+      - quero pagar minha reserva
+      - confirme meu pagamento
+      - confirma meu pagamento
+      - comprovante de pagamento
       - aceita cartao?
       - aceita pix?
       - pagamento da reserva
@@ -231,6 +242,8 @@ nlu:
       - somos 5 pessoas e quero suv barato
       - quero luxo para o fim de semana
       - tenho 800 reais por dia
+      - me recomenda um carro para viagem
+      - me recomenda um carro
 
   - intent: login_cadastro
     examples: |
@@ -276,7 +289,12 @@ nlu:
       - meus agendamentos
       - onde estao meus carros reservados?
       - consultar minha reserva
+      - consultar minhas reservas
+      - quero ver minha reserva
+      - onde esta minha reserva
       - ver reserva feita
+      - reservas feitas
+      - minhas locacoes
       - historico de reservas
       - reserva ativa
       - tenho reserva?
