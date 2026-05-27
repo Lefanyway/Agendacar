@@ -151,13 +151,20 @@ const INTENTS_CONFIG: IntentConfig[] = [
     termos: {
       "cancelar minha reserva": 10,
       "cancelar reserva": 9,
+      "cancela minha reserva": 10,
+      "como cancelo minha reserva": 10,
       "como cancelo uma reserva": 9,
       "como cancelar uma reserva": 9,
+      "desmarcar reserva": 9,
+      "desfazer reserva": 9,
       cancelamento: 7,
       cancelar: 5,
+      cancela: 5,
+      cancelo: 5,
       desmarcar: 6,
       desfazer: 6,
       desistir: 6,
+      "desistir da reserva": 9,
       "remover reserva": 9
     }
   },
@@ -168,12 +175,15 @@ const INTENTS_CONFIG: IntentConfig[] = [
       "alterar minha reserva": 10,
       "alterar reserva": 9,
       "mudar a data": 9,
+      "mudar data da reserva": 10,
       "mudar data": 8,
+      "trocar data da reserva": 10,
       "trocar data": 8,
       remarcar: 7,
       "editar reserva": 8,
       "data errada": 7,
-      reagendar: 7
+      reagendar: 7,
+      "reagendar reserva": 9
     }
   },
   {
@@ -256,6 +266,8 @@ const INTENTS_CONFIG: IntentConfig[] = [
       "reservar carro": 8,
       "quero alugar um carro": 10,
       "alugar um carro": 9,
+      "preciso de um carro": 9,
+      "quero locar um veiculo": 9,
       "locar carro": 8,
       "agendar carro": 8,
       "carro para amanha": 7,
@@ -267,6 +279,7 @@ const INTENTS_CONFIG: IntentConfig[] = [
     prioridade: 10,
     termos: {
       "me mostra todos os carros": 10,
+      "mostra todos os carros": 10,
       "todos os carros": 9,
       "quais carros voces tem": 9,
       "quais carros": 9,
@@ -410,6 +423,11 @@ class ChatbotService {
   }
 
   private classificarIntencao(texto: string): Classificacao {
+    const critica = this.classificarIntencaoCritica(texto);
+    if (critica) {
+      return critica;
+    }
+
     if (this.ehForaDeEscopo(texto)) {
       return { intent: "fora_escopo", confidence: 0.95 };
     }
@@ -468,6 +486,67 @@ class ChatbotService {
       intent: melhor.intent,
       confidence: Number(Math.min(0.98, Math.max(0.55, melhor.score / 10)).toFixed(2))
     };
+  }
+
+  private classificarIntencaoCritica(texto: string): Classificacao | null {
+    const falaDeReserva = this.temAlgumaPalavra(texto, [
+      "reserva",
+      "reservas",
+      "agendamento",
+      "agendamentos",
+      "locacao",
+      "locacoes"
+    ]);
+
+    if (
+      falaDeReserva &&
+      this.temAlgumaPalavra(texto, [
+        "cancelar",
+        "cancela",
+        "cancelo",
+        "desmarcar",
+        "desfazer",
+        "remover",
+        "desistir"
+      ])
+    ) {
+      return { intent: "cancelar_reserva", confidence: 0.98 };
+    }
+
+    if (
+      falaDeReserva &&
+      this.temAlgumaPalavra(texto, [
+        "alterar",
+        "mudar",
+        "trocar",
+        "editar",
+        "remarcar",
+        "reagendar",
+        "modificar"
+      ])
+    ) {
+      return { intent: "alterar_reserva", confidence: 0.98 };
+    }
+
+    if (
+      this.contemTermo(texto, "minhas reservas") ||
+      this.contemTermo(texto, "ver minhas reservas") ||
+      this.contemTermo(texto, "consultar minhas reservas") ||
+      this.contemTermo(texto, "minhas locacoes") ||
+      this.contemTermo(texto, "meus agendamentos") ||
+      (falaDeReserva && this.temAlgumaPalavra(texto, ["minhas", "meus", "vejo", "ver", "consultar"]))
+    ) {
+      return { intent: "minhas_reservas", confidence: 0.98 };
+    }
+
+    if (
+      falaDeReserva &&
+      this.temAlgumaPalavra(texto, ["pagar", "pagamento", "pix", "cartao", "boleto", "comprovante"])
+    ) {
+      return { intent: "pagamento", confidence: 0.96 };
+    }
+
+    return null;
   }
 
   private classificarTermoGenerico(texto: string): Classificacao | null {
