@@ -86,15 +86,16 @@ function pareceFluxoComCards(textoUsuario, intent) {
 
   return (
     /\b(reservar|alugar|locar)\b.*\b(carro|veiculo)\b/.test(texto) ||
-    /\b(quero|preciso|buscar|ver|mostrar)\b.*\b(carro|carros|veiculo|veiculos|modelos)\b/.test(texto) ||
-    /\b(carros disponiveis|quais carros|modelos disponiveis|ver carros)\b/.test(texto) ||
+    /\b(quero|preciso|buscar|ver|mostrar|mostra|mostre|listar|liste)\b.*\b(carro|carros|veiculo|veiculos|modelos)\b/.test(texto) ||
+    /\b(carros disponiveis|quais carros|modelos disponiveis|ver carros|todos os carros|me mostra todos os carros|mostrar carros|mostra carros|mostre os carros|listar carros|liste os carros)\b/.test(texto) ||
     /\b(suv|sedan|esportivo|luxo|economico|barato|automatico|manual)\b/.test(texto) ||
     /\b(recomenda|recomendar|indicacao|indicar)\b.*\b(carro|veiculo)\b/.test(texto)
   )
 }
 
 function obterCardsPermitidos(data, textoUsuario) {
-  const cards = Array.isArray(data?.cards) ? data.cards.filter(Boolean) : []
+  const cardsRecebidos = data?.cards || data?.carros || data?.vehicles
+  const cards = Array.isArray(cardsRecebidos) ? cardsRecebidos.filter(Boolean) : []
 
   if (!cards.length) {
     return []
