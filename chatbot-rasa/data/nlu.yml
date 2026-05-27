@@ -4,32 +4,28 @@ nlu:
   - intent: saudacao
     examples: |
       - oi
-      - olá
       - ola
       - bom dia
       - boa tarde
       - boa noite
-      - e aí
-      - fala
-      - salve
+      - e ai
       - opa
-      - oii
-      - oie
+      - salve
       - preciso de ajuda
       - pode me ajudar?
-      - me ajuda
       - ajuda aqui
+      - menu
+      - comecar
 
   - intent: despedida
     examples: |
       - tchau
-      - até mais
-      - até logo
+      - ate mais
+      - ate logo
       - falou
       - flw
-      - era isso
-      - encerrar
       - sair
+      - encerrar
       - valeu tchau
       - obrigado tchau
 
@@ -44,80 +40,63 @@ nlu:
       - ajudou
       - perfeito
       - show
-      - boa
       - era isso mesmo
 
   - intent: reservar_carro
     examples: |
       - quero reservar um carro
       - quero fazer uma reserva
-      - como faço uma reserva?
+      - como faco uma reserva?
       - como reservar?
-      - quero alugar um carro
-      - quero alugar um veículo
+      - como alugo um carro?
+      - quero alugar um veiculo
       - preciso agendar um carro
-      - preciso reservar um veículo
       - fazer reserva
-      - reservar veículo
+      - reservar veiculo
       - reservar carro
       - agendar carro
-      - alugar carro para amanhã
-      - quero um carro para o fim de semana
-      - quero um carro para viajar
+      - carro para amanha
+      - carro para o fim de semana
       - qro reservar um carro
       - quero resrvar um carro
       - quero reserva carro
-      - como reservo um carro?
-      - como alugo um carro?
+      - quero locar um carro
+      - onde clico para reservar?
 
   - intent: reservar_modelo
     examples: |
       - quero reservar a [Porsche 911](carro_modelo)
-      - quero reservar a [Porsche](carro_modelo)
       - quero alugar a [Porsche](carro_modelo)
       - reserva a [Porsche](carro_modelo)
       - reservar [Porsche 911](carro_modelo)
-      - quero a [Porsche](carro_modelo)
       - quero pegar a [Porsche](carro_modelo)
       - quero reservar o [T-Cross](carro_modelo)
-      - quero reservar o [tcross](carro_modelo)
       - quero alugar o [T-Cross](carro_modelo)
-      - reserva o [T-Cross](carro_modelo)
-      - quero o [T-Cross](carro_modelo)
       - quero reservar o [Civic Type-R](carro_modelo)
-      - quero reservar o [Civic](carro_modelo)
-      - quero alugar o [Civic](carro_modelo)
-      - reserva o [Civic Type-R](carro_modelo)
-      - quero o [Civic](carro_modelo)
       - quero reservar a [Silverado](carro_modelo)
-      - quero alugar a [Silverado](carro_modelo)
-      - reserva a [Silverado](carro_modelo)
-      - quero a [Silverado](carro_modelo)
-      - quero reservar a [picape Silverado](carro_modelo)
+      - quero reservar uma [picape Silverado](carro_modelo)
 
   - intent: consultar_carros
     examples: |
       - quais carros tem?
-      - quais carros estão disponíveis?
+      - quais carros estao disponiveis?
       - quero ver os carros
       - mostrar carros
-      - mostrar carros disponíveis
-      - ver veículos
-      - consultar veículos
+      - mostrar carros disponiveis
+      - ver veiculos
       - consultar frota
-      - quais veículos posso reservar?
-      - tem carro automático?
+      - quais veiculos posso reservar?
+      - tem carro automatico?
       - tem carro manual?
       - tem carro de luxo?
       - tem carro esportivo?
       - tem suv?
       - lista de carros
-      - carros disponíveis
-      - quero olhar os carros
+      - carros disponiveis
       - q carro tem?
       - qais carros tem?
-      - quais veiculos tem?
       - me mostra os carros
+      - tem algum carro livre?
 
   - intent: consultar_modelo
     examples: |
@@ -125,69 +104,56 @@ nlu:
       - tem [Porsche 911](carro_modelo)?
       - quero ver a [Porsche](carro_modelo)
       - mostra a [Porsche](carro_modelo)
-      - informações da [Porsche](carro_modelo)
+      - informacoes da [Porsche](carro_modelo)
       - detalhes da [Porsche 911](carro_modelo)
       - tem [T-Cross](carro_modelo)?
       - quero ver o [T-Cross](carro_modelo)
       - mostra o [T-Cross](carro_modelo)
-      - informações do [T-Cross](carro_modelo)
       - tem [Civic](carro_modelo)?
-      - tem [Civic Type-R](carro_modelo)?
-      - quero ver o [Civic](carro_modelo)
       - mostra o [Civic Type-R](carro_modelo)
       - tem [Silverado](carro_modelo)?
       - quero ver a [Silverado](carro_modelo)
-      - mostra a [Silverado](carro_modelo)
 
   - intent: preco_carros
     examples: |
       - quanto custa?
-      - qual o preço?
+      - qual o preco?
       - qual o valor?
-      - preço da diária
+      - preco da diaria
       - valor por dia
-      - quanto é a diária?
+      - quanto e a diaria?
       - quanto custa alugar?
-      - preço do carro
-      - valor do veículo
-      - é caro?
+      - preco do carro
+      - valor do veiculo
+      - e caro?
       - tem carro barato?
-      - quero saber o valor
       - qnt custa?
-      - qnt é a diaria?
+      - qnt e a diaria?
       - qual valor da reserva?
-      - quanto custa a Porsche?
-      - quanto custa o T-Cross?
-      - quanto custa o Civic?
-      - quanto custa a Silverado?
+      - diaria ate 500 reais
+      - carro de ate 1000 reais
 
   - intent: disponibilidade
     examples: |
-      - esse carro está disponível?
-      - tem carro disponível?
+      - esse carro esta disponivel?
+      - tem carro disponivel?
       - como vejo disponibilidade?
       - posso reservar hoje?
-      - está livre?
+      - esta livre?
       - carro livre
-      - carro indisponível
+      - carro indisponivel
       - disponibilidade do carro
-      - quero saber se pode reservar
-      - tem disponível para hoje?
-      - tem disponível amanhã?
-      - está disponível no fim de semana?
-      - disponivel
-      - disponível hoje
-      - a Porsche está disponível?
-      - o T-Cross está disponível?
-      - o Civic está disponível?
-      - a Silverado está disponível?
+      - tem disponivel para hoje?
+      - tem disponivel amanha?
+      - disponivel no fim de semana?
+      - quais estao livres?
 
   - intent: filtros_carros
     examples: |
       - como filtro os carros?
-      - quero filtrar por preço
-      - quero ordenar por menor preço
-      - quero ordenar por maior preço
+      - quero filtrar por preco
+      - quero ordenar por menor preco
+      - quero ordenar por maior preco
       - tem filtro?
       - posso filtrar por tipo?
       - quero buscar por modelo
@@ -199,15 +165,14 @@ nlu:
       - procurar carro barato
       - buscar carro
       - pesquisar carro
-      - quero pesquisar um carro
-      - como acho um carro específico?
+      - como acho um carro especifico?
 
   - intent: pagamento
     examples: |
-      - como faço o pagamento?
+      - como faco o pagamento?
       - onde pago?
       - quando eu pago?
-      - aceita cartão?
+      - aceita cartao?
       - aceita pix?
       - pagamento da reserva
       - quero pagar
@@ -219,68 +184,66 @@ nlu:
       - fechar pagamento
       - pgto
       - pagmanto
-      - cartão de crédito
+      - cartao de credito
       - pagamento online
+      - tem parcela?
 
   - intent: area_admin
     examples: |
-      - como entro na área admin?
+      - como entro na area admin?
       - o que o administrador faz?
       - quero cadastrar um carro
-      - quero editar um veículo
+      - quero editar um veiculo
       - quero remover um carro
       - painel administrativo
-      - área administrativa
+      - area administrativa
       - sou admin
       - login admin
-      - cadastrar veículo
+      - cadastrar veiculo
       - editar carro
       - deletar carro
-      - remover veículo
-      - gestão de carros
-      - admin
-      - administrador
+      - remover veiculo
+      - gestao de carros
       - painel adm
 
   - intent: recomendacao
     examples: |
-      - qual carro você recomenda?
+      - qual carro voce recomenda?
       - me indique um carro
-      - melhor carro para família
+      - melhor carro para familia
       - melhor carro para viagem
       - melhor carro barato
       - melhor carro esportivo
-      - quero uma recomendação
-      - qual veículo combina comigo?
+      - quero uma recomendacao
+      - qual veiculo combina comigo?
       - preciso de um carro barato
       - preciso de um carro para 5 pessoas
-      - quero um carro econômico
-      - quero um carro confortável
+      - quero um carro economico
+      - quero um carro confortavel
       - carro para viajar
-      - carro para família
+      - carro para familia
       - carro para casal
       - recomenda um carro
-      - recomendação inteligente
-      - sugestão de carro
+      - sugestao de carro
       - me ajuda a escolher um carro
-      - não sei qual carro escolher
-      - nao sei qual carro pegar
+      - nao sei qual carro escolher
       - qual carro pego?
-      - melhor opção
+      - somos 5 pessoas e quero suv barato
+      - quero luxo para o fim de semana
+      - tenho 800 reais por dia
 
   - intent: login_cadastro
     examples: |
-      - como faço login?
+      - como faco login?
       - quero entrar
       - quero criar conta
       - quero me cadastrar
       - cadastro
       - login
       - entrar na conta
-      - criar usuário
+      - criar usuario
       - criar uma conta
       - preciso de conta?
-      - como cadastro meu usuário?
       - fazer cadastro
       - acessar minha conta
       - logar
@@ -289,19 +252,18 @@ nlu:
 
   - intent: problema_login
     examples: |
-      - não consigo entrar
-      - meu login não funciona
+      - nao consigo entrar
+      - meu login nao funciona
       - senha errada
       - esqueci minha senha
-      - não entra na conta
+      - nao entra na conta
       - deu erro no login
       - problema no cadastro
       - erro ao cadastrar
-      - meu usuário não entra
+      - meu usuario nao entra
       - login com erro
-      - senha inválida
-      - email inválido
-      - nao consigo logar
+      - senha invalida
+      - email invalido
       - n consigo entrar
       - bug no login
       - deu ruim no login
@@ -312,10 +274,10 @@ nlu:
       - quero ver minhas reservas
       - minhas reservas
       - meus agendamentos
-      - onde estão meus carros reservados?
+      - onde estao meus carros reservados?
       - consultar minha reserva
       - ver reserva feita
-      - histórico de reservas
+      - historico de reservas
       - reserva ativa
       - tenho reserva?
       - quero acompanhar minha reserva
@@ -353,20 +315,20 @@ nlu:
       - remover reserva
       - qro cancelar reserva
       - como cancela a reserva?
-      - cancelar minha locação
+      - cancelar minha locacao
 
   - intent: suporte_humano
     examples: |
-      - quero falar com alguém
+      - quero falar com alguem
       - preciso de suporte
       - falar com atendente
       - atendimento humano
       - quero ajuda de uma pessoa
       - chamar suporte
       - falar com administrador
-      - preciso resolver com alguém
+      - preciso resolver com alguem
       - suporte humano
-      - falar com responsável
+      - falar com responsavel
       - tem atendente?
 
   - intent: fora_escopo
@@ -380,26 +342,21 @@ nlu:
       - foda-se
       - nada a ver
       - qualquer coisa
-      - sei lá
-      - nao sei
-      - não sei
+      - sei la
       - kkkkkkkkk
       - hahaha
       - asdkjasd
       - ajskdhasjkdh
       - 123123123
       - ???
-      - ///////
-      - carro azul banana
+      - /////
       - banana azul
       - teste teste teste
       - blablabla
-      - hmmmm
-      - coisa aleatória
       - me conta uma piada
-      - qual a previsão do tempo?
-      - quanto está o dólar?
-      - canta uma música
+      - qual a previsao do tempo?
+      - quanto esta o dolar?
+      - canta uma musica
       - me manda uma receita
       - fala sobre futebol
       - indica um filme
@@ -410,6 +367,8 @@ nlu:
       - porsche
       - Porsche 911
       - 911
+      - porshe
+      - porche
 
   - synonym: T-Cross
     examples: |
@@ -428,3 +387,5 @@ nlu:
     examples: |
       - silverado
       - Silverado
+      - caminhonete
+      - pickup

@@ -25,88 +25,67 @@ intents:
 
 responses:
   utter_saudacao:
-    - text: "Olá! Sou o assistente do AgendaCar. Posso ajudar com carros, reservas, pagamento e recomendações."
-    - text: "Oi! Me diga o que você precisa: reservar, ver carros, cancelar ou pedir uma recomendação."
+    - text: "Oi! Posso ajudar com carros, reservas, pagamento, login, cancelamento, recomendacoes e area administrativa. Sobre qual assunto voce quer falar?"
 
   utter_despedida:
-    - text: "Até mais! Quando precisar, é só chamar."
-    - text: "Fechado. Volte quando quiser consultar ou reservar um carro."
+    - text: "Ate mais! Quando quiser consultar ou reservar um carro, estou por aqui."
 
   utter_agradecimento:
-    - text: "De nada!"
-    - text: "Disponha! Estou por aqui."
+    - text: "De nada! Quando quiser comparar carros ou tirar duvida sobre reserva, pode chamar."
 
   utter_reservar_carro:
-    - text: "Para reservar, escolha um carro disponível, informe as datas e confirme a reserva."
-    - text: "A reserva é feita pela tela de carros. Selecione o veículo e o período desejado."
+    - text: "Para reservar, abra um card de carro, confira diaria, capacidade e disponibilidade, clique no veiculo desejado e informe o periodo. Depois revise os dados e avance para o pagamento."
 
   utter_reservar_modelo:
-    - text: "Para reservar esse modelo, acesse a lista de carros, clique no veículo desejado e informe as datas da reserva."
-    - text: "Você consegue reservar esse modelo pelo card do veículo, desde que ele esteja disponível."
+    - text: "Para reservar esse modelo, encontre o card dele na tela inicial, confira disponibilidade e diaria, abra os detalhes e informe o periodo da reserva."
 
   utter_cancelar_reserva:
-    - text: "Para cancelar, acesse suas reservas e clique na opção de cancelamento."
-    - text: "Você pode cancelar uma reserva pela área de reservas do usuário."
+    - text: "Para cancelar, acesse Minhas Reservas e escolha a reserva desejada. O sistema permite cancelar apenas reservas da conta logada."
 
   utter_consultar_carros:
-    - text: "Você pode ver os carros na tela inicial ou na lista de veículos."
-    - text: "A lista de carros mostra modelo, preço, capacidade, tipo e disponibilidade."
+    - text: "Na tela inicial, veja os cards dos carros. Cada card mostra modelo, diaria, capacidade, transmissao e disponibilidade. Para reservar, clique no carro desejado e informe o periodo."
 
   utter_consultar_modelo:
-    - text: "Você pode consultar esse modelo pela busca da tela inicial. O sistema mostra preço, capacidade, transmissão e disponibilidade."
-    - text: "Procure o modelo na lista de carros para ver os detalhes e iniciar uma reserva."
+    - text: "Use a busca da tela inicial para procurar o modelo. O card mostra diaria, capacidade, transmissao e disponibilidade antes da reserva."
 
   utter_filtros_carros:
-    - text: "Use os filtros para buscar por tipo, preço, disponibilidade ou capacidade."
-    - text: "Você pode filtrar e ordenar os carros para encontrar a melhor opção."
+    - text: "Use busca, tipo, disponibilidade e ordenacao na tela inicial. Assim voce encontra carros por modelo, categoria, diaria ou capacidade."
 
   utter_preco_carros:
-    - text: "O preço aparece no card de cada carro, normalmente como valor por dia."
-    - text: "Consulte o card do veículo para ver o valor da diária."
+    - text: "A diaria aparece no card de cada carro. O valor total e calculado conforme o periodo informado na reserva."
 
   utter_disponibilidade:
-    - text: "A disponibilidade aparece na lista de carros. Só veículos disponíveis podem ser reservados."
-    - text: "Confira na tela de carros se o veículo está marcado como disponível."
+    - text: "A disponibilidade aparece no card do carro. Se estiver indisponivel, escolha outro modelo ou tente consultar a frota novamente depois."
 
   utter_pagamento:
-    - text: "O pagamento é feito após escolher o carro e confirmar o período da reserva."
-    - text: "Antes de pagar, confira o carro, as datas e o valor total."
+    - text: "O pagamento vem depois da escolha do carro e do periodo. Antes de finalizar, confira veiculo, datas, destino e valor total."
 
   utter_area_admin:
-    - text: "A área admin permite cadastrar, editar e remover carros."
-    - text: "Somente usuários administradores acessam o painel administrativo."
+    - text: "A area administrativa permite cadastrar, editar e remover carros da frota. Ela e restrita a usuarios com perfil de administrador."
 
   utter_recomendacao:
-    - text: "A recomendação usa orçamento, passageiros e tipo de viagem para sugerir um carro."
-    - text: "Informe seu perfil de uso e o sistema indica o veículo mais adequado."
+    - text: "Para recomendar melhor, informe passageiros, orcamento por diaria e tipo de uso, como familia, viagem, luxo, esportivo ou economico."
 
   utter_login_cadastro:
-    - text: "Você pode criar uma conta ou entrar com seu e-mail e senha na tela de login."
-    - text: "Para usar reservas, faça login ou cadastre uma conta."
+    - text: "Use a tela de login para entrar com email e senha. Se ainda nao tiver conta, faca o cadastro. Reservas e pagamentos exigem usuario autenticado."
 
   utter_problema_login:
-    - text: "Confira se e-mail e senha estão corretos. Se continuar, tente sair e entrar novamente."
-    - text: "Verifique os dados digitados. O login precisa de e-mail e senha válidos."
+    - text: "Confira email e senha digitados. Se o problema continuar, tente cadastrar novamente ou procure suporte. Por seguranca, nao envie senha pelo chat."
 
   utter_minhas_reservas:
-    - text: "Suas reservas ficam na área do usuário, na tela de reservas."
-    - text: "Acesse a área de reservas para consultar seus agendamentos."
+    - text: "Suas reservas ficam em Minhas Reservas. La voce acompanha carro, periodo, valor e status da reserva feita pela sua conta."
 
   utter_alterar_reserva:
-    - text: "Para alterar uma reserva, cancele a atual e faça uma nova com as datas corretas."
-    - text: "No momento, a forma mais segura é cancelar e criar uma nova reserva."
+    - text: "No momento, a forma segura de alterar e cancelar a reserva atual e criar uma nova com o carro, datas e destino corretos."
 
   utter_suporte_humano:
-    - text: "Se o problema continuar, procure o suporte ou um administrador do sistema."
-    - text: "Para casos específicos, fale com o responsável pelo sistema."
+    - text: "Se precisar de ajuda humana, procure o responsavel pelo sistema ou o suporte informado pela equipe do AgendaCar."
 
   utter_fora_escopo:
-    - text: "Não consigo ajudar com isso. Posso responder sobre carros, reservas, pagamento, login ou recomendações."
-    - text: "Essa dúvida foge do AgendaCar. Posso ajudar com reserva, carros, cancelamento ou pagamento."
+    - text: "Essa pergunta foge do AgendaCar. Posso ajudar apenas com carros, reservas, pagamento, login, cancelamento, recomendacoes e area administrativa."
 
   utter_fallback:
-    - text: "Não entendi. Tente perguntar sobre carros, reserva, pagamento, cancelamento ou recomendação."
-    - text: "Pode reformular? Eu ajudo com carros, reservas, login, pagamento e área admin."
+    - text: "Nao tenho certeza do que voce quis dizer. Pode reformular? Eu ajudo com carros, reservas, pagamento, login, cancelamento, recomendacoes e area admin."
 
 session_config:
   session_expiration_time: 60
